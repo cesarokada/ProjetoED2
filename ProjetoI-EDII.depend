@@ -1,0 +1,22 @@
+# depslib dependency file v1.0
+1422545054 source:c:\users\'\desktop\projetoi-edii\main.c
+	<stdio.h>
+	<stdlib.h>
+	"Funcs.h"
+
+1422544813 source:c:\users\'\desktop\projetoi-edii\funcs.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<math.h>
+	"arqFuncs.h"
+
+1422331843 c:\users\'\desktop\projetoi-edii\funcs.h
+
+1422542901 source:c:\users\'\desktop\projetoi-edii\arqfuncs.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+
+1422331324 c:\users\'\desktop\projetoi-edii\arqfuncs.h
+
