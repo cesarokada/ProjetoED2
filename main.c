@@ -57,11 +57,11 @@ int main()
 {
     int opcao;
 
-    do{
+    //wdo{
         cabecalho();
         opcao = menu();
         validaOpcao(opcao);
-        system("cls");
-    }while(opcao != 0);
+        //system("cls");
+    //}while(opcao != 0);
     return 0;
 }

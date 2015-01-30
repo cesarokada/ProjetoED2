@@ -52,35 +52,39 @@ int headListAP2 = -1;//indica a cabeça da lista de disponíveis em AP2
 /******Quando estes valores acima forem igual a -1, inerimos no fim do arquivo*******/
 
 RegIdx Idx1[MAX]; //Vetor que guarda as estruturas do indice
-fimIdx1 = 0;
+int fimIdx1 = 0;
 
-int pesquisaKeyPrimariaAP2(int ch, FILE *fileAP2)
+int pesquisaKeyPrimariaAP2(int ch, FILE *fp)
 {
-    FILE *aux;
-    aux = fileOpen(FileAP2, &headListAP2);
+    FILE *auxFp;
+    auxFp = fileOpen(FileAP2, &headListAP2);
 
     char num[5];
     int offset = 0,achou = 0;
 
-    aux = fileAP2;
-    fread(num,sizeof(int),1,aux);
-    int v = atoi(num);
-    if (v == 0)
-        return -1;
+    auxFp = fp;
 
-    while(!(feof(fileAP2))){
+    fread(num,sizeof(int),1,auxFp);
+    int v = atoi(num);
+
+    if (v == 0){
+        fseek(fp,sizeof(int),0);
+        return -1;
+    }
+
+    while(!(feof(fp))){
         if (ch == v){
             achou = 1;
             break;
         }
         offset++;
-        fseek(fileAP2,sizeof(RegAP2),1);
-        aux = fileAP2;
-        fread(&num,sizeof(int),1,aux);
+        fseek(fp,sizeof(RegAP2),1);
+        auxFp = fp;
+        fread(num,sizeof(int),1,auxFp);
         v = atoi(num);
     }
 
-    fclose(aux);
+    fclose(auxFp);
 
     if (achou)
         return offset;
@@ -100,10 +104,11 @@ int insereAP2(RegAP2* novoAp2){
     fpAP2 = fileOpen(FileAP2, &headListAP2);
     aux = fileOpen(FileAP2, &headListAP2);
 
+    //fclose(fpAP2);
     achou = pesquisaKeyPrimariaAP2(novoAp2->codigoCachorro, aux);
 
     if(headListAP2 == -1 && achou == -1){
-        fseek(fpAP2,0,SEEK_END);
+        fseek(fpAP2,-4,SEEK_END);
         itoa(novoAp2->codigoCachorro,num,10);
         fwrite(num,sizeof(int),1,fpAP2);
         fwrite(novoAp2->nomeCachorro,50*sizeof(char),1,fpAP2);
@@ -112,7 +117,6 @@ int insereAP2(RegAP2* novoAp2){
         fclose(aux);
         return 1;
     }
-
     else if(achou != -1){
         printf("\nCadastro ja existente!\n");
         fclose(fpAP2);
@@ -157,32 +161,34 @@ int obterDadosCadastroAP2()
         return 0;
 }
 
-int firstFit(int tam,FILE *fp){
+/*int firstFit(int tam,FILE *fp){
     char tamRegDispo[5], valOffset[5];
     int tamDispo, offsetProx, achou = 0;
     FILE *aux;
     aux = fileOpen(FileAP1, &headListAP1);
     aux = fp;
+
     fseek(fp,headListAP1*sizeof(char),1);
     fread(tamRegDispo,sizeof(int),1,fp);//le o tamanho do espço disponivel
     tamDispo = atoi(tamRegDispo);
-
+    fseek(fp,1,1);//pulando o caracter '!'
     fread(valOffset,sizeof(int),1,fp);//le o offset do proximo espaço vazio
     offsetProx = atoi(valOffset);
 
-    while(!(feof(fp))){
+    while(!(feof(fp)) || offsetProx != -1){
         if (tam <= tamDispo){
             achou = 1;
             headListAP1 = offsetProx;
             break;
         }
+        fseek(fp,sizeof(int),0);
         fseek(fp,offsetProx*sizeof(char),1);
         aux = fp;
         fread(tamRegDispo,sizeof(int),1,fp);//le o tamanho do espço disponivel
         tamDispo = atoi(tamRegDispo);
 
         fread(valOffset,sizeof(int),1,fp);//le o offset do proximo espaço vazio
-        offsetProx = offsetProx + atoi(valOffset);
+        offsetProx = atoi(valOffset);
     }
 
 
@@ -190,7 +196,7 @@ int firstFit(int tam,FILE *fp){
         return offsetProx;
     else
         return -1;
-}
+}*/
 
 int insereAP1(RegAP1* novoAp1){
 
@@ -205,8 +211,6 @@ int insereAP1(RegAP1* novoAp1){
 
     rewind(aux);
 
-    printf("testando o git");
-    printf("outro teste");
 
     fread(valorCabecalho,sizeof(int),1,aux);
     headListAP1 = atoi(valorCabecalho);
@@ -217,7 +221,7 @@ int insereAP1(RegAP1* novoAp1){
                             novoAp1->dataVacina,novoAp1->respVacina);
     tam = strlen(buffer);
 
-    if(fimIdx == 0)
+    /*if(fimIdx == 0)
         Idx1[fimIdx].codControle = 1;
     else{
         Idx1[fimIdx].codControle = Idx1[fimIdx-1].codControle + 1;
@@ -231,19 +235,19 @@ int insereAP1(RegAP1* novoAp1){
     else{
         Idx1[fimIdx].offset = offsetAux;
         fimIdx++;
-    }
+    }*/
 
-    /*if(headListAP1 == -1){
+    if(headListAP1 == -1){
         fseek(fpAP1,0,SEEK_END);
-        itoa(tam,num1,10);*/
+        itoa(tam,num1,10);
         fwrite(num1,sizeof(int),1,fpAP1);
         fwrite(buffer,sizeof(char),tam,fpAP1);
         fclose(fpAP1);
         fclose(aux);
         return 1;
-    /*}
+    }
     else{
-        proxOffset = firstFit(tam,fpAP1);
+        //proxOffset = firstFit(tam,fpAP1);
         fseek(aux,proxOffset*sizeof(char),1);
         itoa(tam,num1,10);
         fwrite(num1,sizeof(int),1,aux);
@@ -251,13 +255,14 @@ int insereAP1(RegAP1* novoAp1){
         fclose(fpAP1);
         fclose(aux);
         return 1;
-    }*/
+    }
 }
 
 int obterDadosCadastroAP1(int codDog)
 {
     RegAP1 novoAp1;
 
+    novoAp1.codigoControle = 1;
     novoAp1.codigoCachorro = codDog;
     printf("\nNome da Vacina: ");
     fflush(stdin);
@@ -281,7 +286,7 @@ int alteraVacina()
     RegAP2 reg2;
 
     printf("\nDigite o Codigo do cachorro que deseja alterar: ");
-    scanf("%d", ch);
+    scanf("%d",&ch);
 
     fp = fileOpen(FileAP2,&headListAP2);
     aux = fileOpen(FileAP2,&headListAP2);
@@ -305,8 +310,8 @@ int alteraVacina()
         printf("5- Raca do Cachorro\n");
         printf("6- Nome do Cachorro\n");
 
-        printf("Digite o Campo que Deseja Alterar: ")
-        scanf("%d",&op)
+        printf("Digite o Campo que Deseja Alterar: ");
+        scanf("%d",&op);
     }while(op < 0 || op > 6);
 
     switch(op){
@@ -319,8 +324,8 @@ int alteraVacina()
             break;
         case 6:
             fseek(fp,achou*sizeof(RegAP2),1);
-            fseek(fp,sizeof(int),1,fp);
-            fseek(fp,50*sizeof(char),1,fp)
+            fseek(fp,sizeof(int),1);
+            fseek(fp,50*sizeof(char),1);
             printf("Digite o Novo Nome do Cachorro: ");
             gets(reg2.nomeCachorro);
             fwrite(reg2.nomeCachorro,50*sizeof(char),1,fp);
@@ -336,7 +341,7 @@ int alteraVacina()
 
     printf("Raca do Cachorro: %s",reg2.raca);
     printf("Nome do Cachorro: %s",reg2.nomeCachorro);
-    printf("Dados do Cadastro Ja Alterado: \n")
+    printf("Dados do Cadastro Ja Alterado: \n");
 
     return 1;
 }

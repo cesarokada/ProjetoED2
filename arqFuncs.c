@@ -52,8 +52,8 @@ FILE* posicionaCabeca(FILE *fp,int **head)
 FILE *fileOpen(char *fileName, int *head)
 {
     FILE *fp;
-    char valorCab[5];
-    int size;
+    char valorCab[5] = "\0";
+    int size,aux;
 
     if((fp = fopen(fileName,"r+b")) == NULL){
         fclose(fp);
@@ -64,19 +64,18 @@ FILE *fileOpen(char *fileName, int *head)
     size = ftell(fp);
     rewind(fp);
 
-    fread(valorCab,sizeof(int),1,fp);
-    *head = atoi(valorCab);
-
     if (size){
-        fp = posicionaCabeca(fp,&head);
+            fread(valorCab,sizeof(int),1,fp);
+            aux = atoi(valorCab);
+            //*head = atoi(valorCab);
+            if (aux != 0)
+                *head = atoi(valorCab);
     }
     else{
-        char num[15];
-        itoa(*head,num,10);
-        fwrite(num,sizeof(int),1,fp);
-        printf("\n%d",*head);
-        fclose(fp);
-        fp = fopen(fileName,"r+b");
+        itoa(*head,valorCab,10);
+        fwrite(valorCab,sizeof(int),1,fp);
+        //fclose(fp);
+        //fp = fopen(fileName,"r+b");
     }
 
     return fp;
