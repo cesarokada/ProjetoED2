@@ -171,14 +171,20 @@ int firstFit(int tam,FILE *fp){
     aux = fileOpen(FileAP1, &headListAP1);
     aux = fp;
 
+
+    fseek(fp,sizeof(int),1);
     fseek(fp,headListAP1*sizeof(char),1);
     fread(tamRegDispo,sizeof(int),1,fp);//le o tamanho do espço disponivel
+    puts(tamRegDispo);
     tamDispo = atoi(tamRegDispo);
+    printf("\n%d\n",tamDispo);
     fseek(fp,1,1);//pulando o caracter '!'
+    printf("teste 6");
     fread(valOffset,sizeof(int),1,fp);//le o offset do proximo espaço vazio
     offsetProx = atoi(valOffset);
-
-    while(!(feof(fp)) || offsetProx != -1){
+    printf("\n%d\n",offsetProx);
+    printf("teste 7");
+    while(offsetProx != -1){
         if (tam <= tamDispo){
             achou = 1;
             headListAP1 = offsetProx;
@@ -261,6 +267,7 @@ int insereAP1(RegAP1* novoAp1){
         return 1;
     }*/
 
+
     if(headListAP1 == -1){
         fseek(fpAP1,0,SEEK_END);
         itoa(tam,num1,10);
@@ -271,7 +278,10 @@ int insereAP1(RegAP1* novoAp1){
         return 1;
     }
     else{
+        printf("teste 1");
         proxOffset = firstFit(tam,fpAP1);
+        return 1;
+        printf("teste 2");
         fseek(aux,proxOffset*sizeof(char),1);
         itoa(tam,num1,10);
         fwrite(num1,sizeof(int),1,aux);
