@@ -205,8 +205,6 @@ int insereAP1(RegAP1* novoAp1){
 
     rewind(aux);
 
-    ebaidnohfiogsuefosfheoio
-
     fread(valorCabecalho,sizeof(int),1,aux);
     headListAP1 = atoi(valorCabecalho);
 
