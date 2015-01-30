@@ -67,7 +67,6 @@ FILE *fileOpen(char *fileName, int *head)
     if (size){
             fread(valorCab,sizeof(int),1,fp);
             aux = atoi(valorCab);
-            //*head = atoi(valorCab);
             if (aux != 0)
                 *head = atoi(valorCab);
     }

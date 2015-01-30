@@ -59,18 +59,21 @@ int pesquisaKeyPrimariaAP2(int ch, FILE *fp)
     FILE *auxFp;
     auxFp = fileOpen(FileAP2, &headListAP2);
 
-    char num[5];
+    char num[20];
     int offset = 0,achou = 0;
 
-    auxFp = fp;
+    rewind(auxFp);
+    fseek(auxFp,sizeof(int),1);
+
+    fp = auxFp;
 
     fread(num,sizeof(int),1,auxFp);
     int v = atoi(num);
 
     if (v == 0){
-        fseek(fp,sizeof(int),0);
         return -1;
     }
+    fseek(fp,-4,1);
 
     while(!(feof(fp))){
         if (ch == v){
@@ -78,9 +81,10 @@ int pesquisaKeyPrimariaAP2(int ch, FILE *fp)
             break;
         }
         offset++;
-        fseek(fp,sizeof(RegAP2),1);
+        rewind(fp);
+        fseek(fp,offset*sizeof(RegAP2)+4,1);
         auxFp = fp;
-        fread(num,sizeof(int),1,auxFp);
+        fread(num,2*sizeof(int),1,auxFp);
         v = atoi(num);
     }
 
@@ -103,12 +107,11 @@ int insereAP2(RegAP2* novoAp2){
 
     fpAP2 = fileOpen(FileAP2, &headListAP2);
     aux = fileOpen(FileAP2, &headListAP2);
-
     //fclose(fpAP2);
     achou = pesquisaKeyPrimariaAP2(novoAp2->codigoCachorro, aux);
 
     if(headListAP2 == -1 && achou == -1){
-        fseek(fpAP2,-4,SEEK_END);
+        fseek(fpAP2,0,SEEK_END);
         itoa(novoAp2->codigoCachorro,num,10);
         fwrite(num,sizeof(int),1,fpAP2);
         fwrite(novoAp2->nomeCachorro,50*sizeof(char),1,fpAP2);
@@ -161,7 +164,7 @@ int obterDadosCadastroAP2()
         return 0;
 }
 
-/*int firstFit(int tam,FILE *fp){
+int firstFit(int tam,FILE *fp){
     char tamRegDispo[5], valOffset[5];
     int tamDispo, offsetProx, achou = 0;
     FILE *aux;
@@ -196,7 +199,7 @@ int obterDadosCadastroAP2()
         return offsetProx;
     else
         return -1;
-}*/
+}
 
 int insereAP1(RegAP1* novoAp1){
 
@@ -211,9 +214,17 @@ int insereAP1(RegAP1* novoAp1){
 
     rewind(aux);
 
-
     fread(valorCabecalho,sizeof(int),1,aux);
     headListAP1 = atoi(valorCabecalho);
+
+    if(fimIdx1 == 0){
+        Idx1[fimIdx1].codControle = 1;
+        novoAp1->codigoControle = Idx1[fimIdx1].codControle;
+    }
+    else{
+        Idx1[fimIdx1].codControle = Idx1[fimIdx1-1].codControle + 1;
+        novoAp1->codigoControle = Idx1[fimIdx1].codControle;
+    }
 
     itoa(novoAp1->codigoControle,num1,10);
     itoa(novoAp1->codigoCachorro,num2,10);
@@ -221,20 +232,33 @@ int insereAP1(RegAP1* novoAp1){
                             novoAp1->dataVacina,novoAp1->respVacina);
     tam = strlen(buffer);
 
-    /*if(fimIdx == 0)
-        Idx1[fimIdx].codControle = 1;
-    else{
-        Idx1[fimIdx].codControle = Idx1[fimIdx-1].codControle + 1;
-    }
-    offsetAux = firstFit(tam,aux);
-    if(headListAP1 == -1 || offsetAux == -1){
+    //offsetAux = firstFit(tam,aux);
+
+    /*if(headListAP1 == -1 || offsetAux == -1){
         fseek(aux,1,SEEK_END);
         Idx1[fimIdx].offset = (ftell(aux)-4);
         fimIdx++;
+
+        fseek(fpAP1,0,SEEK_END);
+        itoa(tam,num1,10);
+        fwrite(num1,sizeof(int),1,fpAP1);
+        fwrite(buffer,sizeof(char),tam,fpAP1);
+        fclose(fpAP1);
+        fclose(aux);
+        return 1;
     }
-    else{
+    else
+        {
         Idx1[fimIdx].offset = offsetAux;
         fimIdx++;
+
+        fseek(aux,proxOffset*sizeof(char),1);
+        itoa(tam,num1,10);
+        fwrite(num1,sizeof(int),1,aux);
+        fwrite(buffer,sizeof(char),tam,aux);
+        fclose(fpAP1);
+        fclose(aux);
+        return 1;
     }*/
 
     if(headListAP1 == -1){
@@ -247,7 +271,7 @@ int insereAP1(RegAP1* novoAp1){
         return 1;
     }
     else{
-        //proxOffset = firstFit(tam,fpAP1);
+        proxOffset = firstFit(tam,fpAP1);
         fseek(aux,proxOffset*sizeof(char),1);
         itoa(tam,num1,10);
         fwrite(num1,sizeof(int),1,aux);
@@ -256,6 +280,7 @@ int insereAP1(RegAP1* novoAp1){
         fclose(aux);
         return 1;
     }
+
 }
 
 int obterDadosCadastroAP1(int codDog)
