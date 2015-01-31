@@ -166,43 +166,45 @@ int obterDadosCadastroAP2()
 
 int firstFit(int tam,FILE *fp){
     char tamRegDispo[5], valOffset[5];
-    int tamDispo, offsetProx, achou = 0;
+    int tamDispo, offsetProx, achou = 0,offsetDispo;
     FILE *aux;
     aux = fileOpen(FileAP1, &headListAP1);
-    aux = fp;
-
 
     fseek(fp,sizeof(int),1);
     fseek(fp,headListAP1*sizeof(char),1);
+    fseek(aux,headListAP1*sizeof(char),1);
+
     fread(tamRegDispo,sizeof(int),1,fp);//le o tamanho do espço disponivel
-    puts(tamRegDispo);
     tamDispo = atoi(tamRegDispo);
-    printf("\n%d\n",tamDispo);
     fseek(fp,1,1);//pulando o caracter '!'
-    printf("teste 6");
     fread(valOffset,sizeof(int),1,fp);//le o offset do proximo espaço vazio
     offsetProx = atoi(valOffset);
-    printf("\n%d\n",offsetProx);
-    printf("teste 7");
-    while(offsetProx != -1){
+
+    do{
         if (tam <= tamDispo){
             achou = 1;
             headListAP1 = offsetProx;
+            printf("cabeca 1 %d",headListAP1);
+            offsetDispo = ftell(aux);
+            printf("\ndisponivel %d\n",offsetDispo);
             break;
         }
+        printf("teste8");
         fseek(fp,sizeof(int),0);
         fseek(fp,offsetProx*sizeof(char),1);
         aux = fp;
         fread(tamRegDispo,sizeof(int),1,fp);//le o tamanho do espço disponivel
         tamDispo = atoi(tamRegDispo);
-
+        printf("\n\ntam dispo%d\n\n",tamDispo);
+        break;
+        fseek(fp,1,1);//pula o caracter '!'
         fread(valOffset,sizeof(int),1,fp);//le o offset do proximo espaço vazio
         offsetProx = atoi(valOffset);
-    }
+    }while(offsetProx != -1);
 
 
     if (achou)
-        return offsetProx;
+        return offsetDispo;
     else
         return -1;
 }
@@ -280,7 +282,6 @@ int insereAP1(RegAP1* novoAp1){
     else{
         printf("teste 1");
         proxOffset = firstFit(tam,fpAP1);
-        return 1;
         printf("teste 2");
         fseek(aux,proxOffset*sizeof(char),1);
         itoa(tam,num1,10);
