@@ -184,9 +184,10 @@ int firstFit(int tam,FILE *fp){
         if (tam <= tamDispo){
             achou = 1;
             headListAP1 = offsetProx;
-            printf("cabeca 1 %d",headListAP1);
-            offsetDispo = ftell(aux);
-            printf("\ndisponivel %d\n",offsetDispo);
+            itoa(headListAP1,valOffset,10);
+            rewind(fp);
+            fwrite(valOffset,sizeof(int),1,fp);
+            offsetDispo = ftell(aux) + 4;
             break;
         }
         printf("teste8");
@@ -274,7 +275,7 @@ int insereAP1(RegAP1* novoAp1){
         fseek(fpAP1,0,SEEK_END);
         itoa(tam,num1,10);
         fwrite(num1,sizeof(int),1,fpAP1);
-        fwrite(buffer,sizeof(char),tam,fpAP1);
+        //fwrite(buffer,sizeof(char),tam,fpAP1);
         fclose(fpAP1);
         fclose(aux);
         return 1;
@@ -283,8 +284,12 @@ int insereAP1(RegAP1* novoAp1){
         printf("teste 1");
         proxOffset = firstFit(tam,fpAP1);
         printf("teste 2");
+        rewind(aux);
         fseek(aux,proxOffset*sizeof(char),1);
         itoa(tam,num1,10);
+        //char *teste;
+        //teste = "testando";
+        //fwrite(teste,sizeof(char),strlen(teste),aux);
         fwrite(num1,sizeof(int),1,aux);
         fwrite(buffer,sizeof(char),tam,aux);
         fclose(fpAP1);
