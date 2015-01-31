@@ -126,21 +126,6 @@ int insereAP2(RegAP2* novoAp2){
         fclose(aux);
         return 0;
     }
-
-    /*achou = pesquisaKeyPrimariaAP2(novoAp2->codigoCachorro, aux);
-    if(achou){
-        printf("\nCadastro ja existente!\n");
-        fclose(fpAP2);
-        fclose(aux);
-        return 0;
-    }*/
-
-    /*char *teste;
-    teste = "isso e um teste";
-    fwrite(teste,sizeof(char),strlen(teste),fpAP2);
-    fclose(fpAP2);
-    achou = pesquisaKeyPrimariaAP2(novoAp2->codigoCachorro, aux);*/
-    //firstFitAP2(&fpAP2,sizeof(novoAP2))
 }
 
 int obterDadosCadastroAP2()
@@ -166,58 +151,39 @@ int obterDadosCadastroAP2()
 
 int firstFit(int tam,FILE *fp){
 
-    char tamRegDispo[5], valOffset[5],s;
-    int tamDispo, offsetProx, achou = 0,offsetDispo, i = 0;
+    char tamRegDispo[5], valOffset[5];
+    int tamDispo, offsetProx, achou = 0,offsetDispo;
     FILE *aux;
 
     aux = fileOpen(FileAP1, &headListAP1);
 
-    printf("\n\ntamanho  %d\n\n     ",tam);
-    fseek(fp,sizeof(int),0);
-    fseek(fp,headListAP1*sizeof(char),1);
-    fseek(aux,headListAP1*sizeof(char),1);
-    fseek(aux,5,1);
-    i = -1;
-    itoa(i,tamRegDispo,10);
-    fwrite(tamRegDispo,sizeof(int),1,aux);
-    printf("\ncabeca 1 %d\n\n",headListAP1);
+    if(feof(aux));
+        return -1;
 
-    fread(tamRegDispo,sizeof(int),1,fp);//le o tamanho do espço disponivel
-    tamDispo = atoi(tamRegDispo);
-    puts(tamRegDispo);
-    printf("\ntam reg dispo %d\n",tamRegDispo);
-    fseek(fp,1,1);//pulando o caracter '!'
-    fread(valOffset,sizeof(int),1,fp);//le o offset do proximo espaço vazio
-    offsetProx = atoi(valOffset);
-    printf("\noffset proximo %d\n",offsetProx);
+    rewind(fp);
+    fseek(fp,sizeof(int),1);
+
+    fseek(fp,headListAP1*sizeof(char)+4 ,1);
+    fseek(aux,headListAP1*sizeof(char)+4,1);
 
     do{
-        if (tam <= tamDispo){
-            printf("teste 7");
-            achou = 1;
-            headListAP1 = offsetProx;
-            *valOffset = "    ";
-            itoa(headListAP1,valOffset,10);
-            rewind(fp);
-            fwrite(valOffset,sizeof(int),1,fp);
-            offsetDispo = ftell(aux) + 4;
-            break;
-        }
-        printf("teste8");
-        rewind(fp);
-        rewind(aux);
-
-        fseek(fp,sizeof(int),1);
-        fseek(aux,sizeof(int),1);
-
-        fseek(fp,offsetProx*sizeof(char),1);
-        fseek(aux,offsetProx*sizeof(char),1);
+        printf("teste7");
         fread(tamRegDispo,sizeof(int),1,fp);//le o tamanho do espço disponivel
         tamDispo = atoi(tamRegDispo);
-        printf("\n\ntam dispo%d\n\n",tamDispo);
         fseek(fp,1,1);//pula o caracter '!'
         fread(valOffset,sizeof(int),1,fp);//le o offset do proximo espaço vazio
         offsetProx = atoi(valOffset);
+        if (tam <= tamDispo){
+            printf("teste 8");
+            achou = 1;
+            headListAP1 = offsetProx;
+            itoa(headListAP1,valOffset,10);
+            rewind(fp);
+            fwrite(valOffset,sizeof(int),1,fp);
+            offsetDispo = ftell(aux);
+            break;
+        }
+
     }while(offsetProx != -1);
 
 
@@ -252,6 +218,10 @@ int insereAP1(RegAP1* novoAp1){
         Idx1[fimIdx1].codControle = Idx1[fimIdx1-1].codControle + 1;
         novoAp1->codigoControle = Idx1[fimIdx1].codControle;
     }
+    int i;
+    for(i = 0; i < fimIdx1; i++){
+        printf("E %d\n",Idx1[i].codControle);
+    }
 
     itoa(novoAp1->codigoControle,num1,10);
     itoa(novoAp1->codigoCachorro,num2,10);
@@ -259,12 +229,11 @@ int insereAP1(RegAP1* novoAp1){
                             novoAp1->dataVacina,novoAp1->respVacina);
     tam = strlen(buffer);
 
-    //offsetAux = firstFit(tam,aux);
-
-    /*if(headListAP1 == -1 || offsetAux == -1){
+    offsetAux = firstFit(tam,aux);
+    if(headListAP1 == -1 || offsetAux == -1){
         fseek(aux,1,SEEK_END);
-        Idx1[fimIdx].offset = (ftell(aux)-4);
-        fimIdx++;
+        Idx1[fimIdx1].offset = (ftell(aux)-4);
+        fimIdx1++;
 
         fseek(fpAP1,0,SEEK_END);
         itoa(tam,num1,10);
@@ -276,45 +245,18 @@ int insereAP1(RegAP1* novoAp1){
     }
     else
         {
-        Idx1[fimIdx].offset = offsetAux;
-        fimIdx++;
+        Idx1[fimIdx1].offset = offsetAux;
+        fimIdx1++;
 
-        fseek(aux,proxOffset*sizeof(char),1);
-        itoa(tam,num1,10);
-        fwrite(num1,sizeof(int),1,aux);
-        fwrite(buffer,sizeof(char),tam,aux);
-        fclose(fpAP1);
-        fclose(aux);
-        return 1;
-    }*/
-
-
-    if(headListAP1 == -1){
-        fseek(fpAP1,0,SEEK_END);
-        itoa(tam,num1,10);
-        fwrite(num1,sizeof(int),1,fpAP1);
-        fwrite(buffer,sizeof(char),tam,fpAP1);
-        fclose(fpAP1);
-        fclose(aux);
-        return 1;
-    }
-    else{
-        printf("teste 1");
-        proxOffset = firstFit(tam,fpAP1);
-        printf("teste 2");
         rewind(aux);
         fseek(aux,proxOffset*sizeof(char),1);
         itoa(tam,num1,10);
-        /*char *teste;
-        teste = "testando";
-        fwrite(teste,sizeof(char),strlen(teste),aux);*/
         fwrite(num1,sizeof(int),1,aux);
         fwrite(buffer,sizeof(char),tam,aux);
         fclose(fpAP1);
         fclose(aux);
         return 1;
     }
-
 }
 
 int obterDadosCadastroAP1(int codDog)
