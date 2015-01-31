@@ -165,25 +165,38 @@ int obterDadosCadastroAP2()
 }
 
 int firstFit(int tam,FILE *fp){
-    char tamRegDispo[5], valOffset[5];
-    int tamDispo, offsetProx, achou = 0,offsetDispo;
+
+    char tamRegDispo[5], valOffset[5],s;
+    int tamDispo, offsetProx, achou = 0,offsetDispo, i = 0;
     FILE *aux;
+
     aux = fileOpen(FileAP1, &headListAP1);
 
-    fseek(fp,sizeof(int),1);
+    printf("\n\ntamanho  %d\n\n     ",tam);
+    fseek(fp,sizeof(int),0);
     fseek(fp,headListAP1*sizeof(char),1);
     fseek(aux,headListAP1*sizeof(char),1);
+    fseek(aux,5,1);
+    i = -1;
+    itoa(i,tamRegDispo,10);
+    fwrite(tamRegDispo,sizeof(int),1,aux);
+    printf("\ncabeca 1 %d\n\n",headListAP1);
 
     fread(tamRegDispo,sizeof(int),1,fp);//le o tamanho do espço disponivel
     tamDispo = atoi(tamRegDispo);
+    puts(tamRegDispo);
+    printf("\ntam reg dispo %d\n",tamRegDispo);
     fseek(fp,1,1);//pulando o caracter '!'
     fread(valOffset,sizeof(int),1,fp);//le o offset do proximo espaço vazio
     offsetProx = atoi(valOffset);
+    printf("\noffset proximo %d\n",offsetProx);
 
     do{
         if (tam <= tamDispo){
+            printf("teste 7");
             achou = 1;
             headListAP1 = offsetProx;
+            *valOffset = "    ";
             itoa(headListAP1,valOffset,10);
             rewind(fp);
             fwrite(valOffset,sizeof(int),1,fp);
@@ -191,13 +204,17 @@ int firstFit(int tam,FILE *fp){
             break;
         }
         printf("teste8");
-        fseek(fp,sizeof(int),0);
+        rewind(fp);
+        rewind(aux);
+
+        fseek(fp,sizeof(int),1);
+        fseek(aux,sizeof(int),1);
+
         fseek(fp,offsetProx*sizeof(char),1);
-        aux = fp;
+        fseek(aux,offsetProx*sizeof(char),1);
         fread(tamRegDispo,sizeof(int),1,fp);//le o tamanho do espço disponivel
         tamDispo = atoi(tamRegDispo);
         printf("\n\ntam dispo%d\n\n",tamDispo);
-        break;
         fseek(fp,1,1);//pula o caracter '!'
         fread(valOffset,sizeof(int),1,fp);//le o offset do proximo espaço vazio
         offsetProx = atoi(valOffset);
@@ -225,6 +242,7 @@ int insereAP1(RegAP1* novoAp1){
 
     fread(valorCabecalho,sizeof(int),1,aux);
     headListAP1 = atoi(valorCabecalho);
+    printf("valoar cabeca 1 %d",headListAP1);
 
     if(fimIdx1 == 0){
         Idx1[fimIdx1].codControle = 1;
@@ -275,7 +293,7 @@ int insereAP1(RegAP1* novoAp1){
         fseek(fpAP1,0,SEEK_END);
         itoa(tam,num1,10);
         fwrite(num1,sizeof(int),1,fpAP1);
-        //fwrite(buffer,sizeof(char),tam,fpAP1);
+        fwrite(buffer,sizeof(char),tam,fpAP1);
         fclose(fpAP1);
         fclose(aux);
         return 1;
@@ -287,9 +305,9 @@ int insereAP1(RegAP1* novoAp1){
         rewind(aux);
         fseek(aux,proxOffset*sizeof(char),1);
         itoa(tam,num1,10);
-        //char *teste;
-        //teste = "testando";
-        //fwrite(teste,sizeof(char),strlen(teste),aux);
+        /*char *teste;
+        teste = "testando";
+        fwrite(teste,sizeof(char),strlen(teste),aux);*/
         fwrite(num1,sizeof(int),1,aux);
         fwrite(buffer,sizeof(char),tam,aux);
         fclose(fpAP1);
