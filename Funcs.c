@@ -11,13 +11,14 @@ O arquivo Funcs.c vai conter todas as funcoes do projeto
 
 #define FileAP1 "Ap1.bin"
 #define FileAP2 "Ap2.bin"
-#define IdxAP1 "idx.bin"
+#define FileIdx1 "idx1.bin"
 
 #include "arqFuncs.h"
 
 
 const int ListaVazia = -1; //indica se a lista disponivel está vazia
-int codControl = 1;
+//int codControl = 1;
+int flagIdx1;
 /*************************************************************
 ---------------- Definicao das estruturas---------------------
 **************************************************************/
@@ -208,7 +209,6 @@ int insereAP1(RegAP1* novoAp1){
 
     fread(valorCabecalho,sizeof(int),1,aux);
     headListAP1 = atoi(valorCabecalho);
-    printf("valoar cabeca 1 %d",headListAP1);
 
     if(fimIdx1 == 0){
         Idx1[fimIdx1].codControle = 1;
@@ -217,10 +217,6 @@ int insereAP1(RegAP1* novoAp1){
     else{
         Idx1[fimIdx1].codControle = Idx1[fimIdx1-1].codControle + 1;
         novoAp1->codigoControle = Idx1[fimIdx1].codControle;
-    }
-    int i;
-    for(i = 0; i < fimIdx1; i++){
-        printf("E %d\n",Idx1[i].codControle);
     }
 
     itoa(novoAp1->codigoControle,num1,10);
@@ -276,6 +272,57 @@ int obterDadosCadastroAP1(int codDog)
     gets(novoAp1.respVacina);
 
     return insereAP1(&novoAp1);
+}
+
+void criaVetorIdx(){
+    FILE *fpIdx1;
+    FILE *fp;
+    FILE* aux;
+
+    char tam[5],c,codControle[5],offset[5];
+    int offsetProx;
+
+    fpIdx1 = fileOpenIdx(FileIdx1, &flagIdx1);
+    if(flagIdx1 == 0){
+        aux = fileOpen(FileAP1,&headListAP1);
+        fp = fileOpen(FileAP1,&headListAP1);
+
+        while(!feof(fp) || !feof(aux)){
+
+            fread(tam,sizeof(int),1,fp);
+            offsetProx = atoi(tam);
+            c = fgetc(fp);
+            if (c == '!')
+                fseek(aux,offsetProx*sizeof(char),SEEK_CUR);
+            else{
+                fread(codControle,sizeof(int),1,fp);
+                Idx1[fimIdx1].codControle = atoi(codControle);
+                Idx1[fimIdx1].offset = ftell(aux) - 4;
+                //chamar ordenaçao do vetor
+                fseek(aux,offsetProx*sizeof(char),SEEK_CUR);
+            }
+        }
+        fclose(fp);
+        fclose(aux);
+        fclose(fpIdx1);
+        return 1;
+    }
+
+    else{
+        aux = fileOpenIdx(FileIdx1, &flagIdx1);
+        while(!feof(fpIdx1) || !feof(aux)){
+            fread(codControle,sizeof(int),1,fpIdx1);
+            Idx1[fimIdx1].codControle = atoi(codControle);
+            fread(offset,sizeof(int),1,fpIdx1);
+            Idx1[fimIdx1].offset = atoi(offset);
+            fseek(aux,sizeof(RegIdx),SEEK_CUR);
+            fpIdx1 = aux;
+        }
+        fclose(fp);
+        fclose(aux);
+        fclose(fpIdx1);
+        return 1;
+    }
 }
 
 int alteraVacina()

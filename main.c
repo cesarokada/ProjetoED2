@@ -57,6 +57,8 @@ int main()
 {
     int opcao;
 
+    criaVetorIdx();
+
     //wdo{
         cabecalho();
         opcao = menu();
