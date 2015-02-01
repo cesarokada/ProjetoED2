@@ -20,12 +20,12 @@
 
 1422331324 c:\users\'\desktop\projetoi-edii\arqfuncs.h
 
-1422637562 source:c:\users\'\documents\github\projetoed2\arqfuncs.c
+1422816364 source:c:\users\'\documents\github\projetoed2\arqfuncs.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
 
-1422802967 source:c:\users\'\documents\github\projetoed2\funcs.c
+1422820512 source:c:\users\'\documents\github\projetoed2\funcs.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
@@ -34,7 +34,7 @@
 
 1422331324 c:\users\'\documents\github\projetoed2\arqfuncs.h
 
-1422627974 source:c:\users\'\documents\github\projetoed2\main.c
+1422811816 source:c:\users\'\documents\github\projetoed2\main.c
 	<stdio.h>
 	<stdlib.h>
 	"Funcs.h"

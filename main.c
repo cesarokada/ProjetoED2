@@ -49,6 +49,7 @@ void validaOpcao(int opcao)
                 printf("Registro Não Encontrado");
             break;
         case 0:
+            salvaIdx();
             break;
     }
 }

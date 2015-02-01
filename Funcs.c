@@ -18,7 +18,8 @@ O arquivo Funcs.c vai conter todas as funcoes do projeto
 
 const int ListaVazia = -1; //indica se a lista disponivel está vazia
 //int codControl = 1;
-int flagIdx1;
+int flagIdx1 = 0;//1 - se o arquivo está atualizado e 0 se não está
+
 /*************************************************************
 ---------------- Definicao das estruturas---------------------
 **************************************************************/
@@ -150,6 +151,20 @@ int obterDadosCadastroAP2()
         return 0;
 }
 
+void escreveFlag()
+{
+    FILE *fp;
+    fp = fileOpenIdx(FileIdx1, &flagIdx1);
+
+    char flag[5];
+
+    rewind(fp);
+    itoa(flagIdx1,flag,10);
+    fwrite(flag,sizeof(int),1,fp);
+
+    return 0;
+}
+
 int firstFit(int tam,FILE *fp){
 
     char tamRegDispo[5], valOffset[5];
@@ -235,6 +250,8 @@ int insereAP1(RegAP1* novoAp1){
         itoa(tam,num1,10);
         fwrite(num1,sizeof(int),1,fpAP1);
         fwrite(buffer,sizeof(char),tam,fpAP1);
+        flagIdx1 = 0;
+        escreveFlag();
         fclose(fpAP1);
         fclose(aux);
         return 1;
@@ -249,6 +266,8 @@ int insereAP1(RegAP1* novoAp1){
         itoa(tam,num1,10);
         fwrite(num1,sizeof(int),1,aux);
         fwrite(buffer,sizeof(char),tam,aux);
+        flagIdx1 = 0;
+        escreveFlag();
         fclose(fpAP1);
         fclose(aux);
         return 1;
@@ -283,23 +302,40 @@ void criaVetorIdx(){
     int offsetProx;
 
     fpIdx1 = fileOpenIdx(FileIdx1, &flagIdx1);
+    //fpIdx1 = fopen(FileIdx1,"w+b");
+    //char valor[4];
+    //itoa(flagIdx1,valor,10);
+    //fwrite(valor,4*sizeof(char),1,fpIdx1);
+    //fclose(fpIdx1);
+    //return 1;
+
+    /*if(!feof(fpIdx1)){
+        flagIdx1 = 1;
+        fclose(fpIdx1);
+        return 1;
+    }*/
+
     if(flagIdx1 == 0){
         aux = fileOpen(FileAP1,&headListAP1);
         fp = fileOpen(FileAP1,&headListAP1);
-
-        while(!feof(fp) || !feof(aux)){
-
+        int i = 0;
+        offsetProx = 4;
+        while(i!=-1){
             fread(tam,sizeof(int),1,fp);
-            offsetProx = atoi(tam);
+            offsetProx = offsetProx + atoi(tam) + 4;
             c = fgetc(fp);
-            if (c == '!')
-                fseek(aux,offsetProx*sizeof(char),SEEK_CUR);
+            if (c == '!'){
+                fseek(aux,offsetProx*sizeof(char),0);
+            }
             else{
                 fread(codControle,sizeof(int),1,fp);
                 Idx1[fimIdx1].codControle = atoi(codControle);
-                Idx1[fimIdx1].offset = ftell(aux) - 4;
-                //chamar ordenaçao do vetor
-                fseek(aux,offsetProx*sizeof(char),SEEK_CUR);
+                Idx1[fimIdx1].offset = offsetProx;
+                fimIdx1++;
+                fseek(aux,offsetProx*sizeof(char),0);
+                *fp = *aux;
+                i = fgetc(aux);
+                fseek(aux,offsetProx*sizeof(char),0);
             }
         }
         fclose(fp);
@@ -323,6 +359,25 @@ void criaVetorIdx(){
         fclose(fpIdx1);
         return 1;
     }
+}
+
+void salvaIdx()
+{
+    flagIdx1 = 1;
+
+    FILE *fp;
+    fp = fileOpenIdx(FileIdx1, &flagIdx1);
+
+    int i;
+    char controle[4],offset[4];
+
+    for(i = 0; i < fimIdx1; i++){
+        itoa(Idx1[i].codControle,controle,10);
+        fwrite(controle,sizeof(int),1,fp);
+        itoa(Idx1[i].offset,offset,10);
+        fwrite(offset,sizeof(int),1,fp);
+    }
+    return 0;
 }
 
 int alteraVacina()
