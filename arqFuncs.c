@@ -66,17 +66,19 @@ FILE* fileOpenIdx(char *fileName, int *head)
     rewind(fp);
 
     if (size){
-            fread(valorFlag,sizeof(int),1,fp);
-            aux = atoi(valorFlag);
-            if (aux != 0)
-                *head = atoi(valorFlag);
+        fread(valorFlag,sizeof(int),1,fp);
+        aux = atoi(valorFlag);
+        if (aux != 0)
+            *head = atoi(valorFlag);
     }
     else{
         itoa(*head,valorFlag,10);
         fwrite(valorFlag,sizeof(int),1,fp);
-        fclose(fp);
-        fp = fopen(fileName,"r+b");
-        fseek(fp,4,1);
+        //fclose(fp);
+        printf("teste");
+        //fp = fopen(fileName,"r+b");
+        //fread(valorFlag,sizeof(int),1,fp);
+        //printf("arquivo %d",atoi(valorFlag));
     }
 
     return fp;

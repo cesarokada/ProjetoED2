@@ -11,7 +11,7 @@ O arquivo Funcs.c vai conter todas as funcoes do projeto
 
 #define FileAP1 "Ap1.bin"
 #define FileAP2 "Ap2.bin"
-#define FileIdx1 "idx1.bin"
+#define FileIdx1 "Idx1.bin"
 
 #include "arqFuncs.h"
 
@@ -299,13 +299,16 @@ void criaVetorIdx(){
     FILE* aux;
 
     char tam[5],c,codControle[5],offset[5];
-    int offsetProx;
+    int offsetProx,i = 0,cont = 0;
 
     fpIdx1 = fileOpenIdx(FileIdx1, &flagIdx1);
+    //fclose(fpIdx1);
+    //return 0;
     //fpIdx1 = fopen(FileIdx1,"w+b");
     //char valor[4];
     //itoa(flagIdx1,valor,10);
-    //fwrite(valor,4*sizeof(char),1,fpIdx1);
+    //fread(valor,4*sizeof(int),1,fpIdx1);
+    //printf(" cabeca ooo %d",atoi(valor));
     //fclose(fpIdx1);
     //return 1;
 
@@ -316,9 +319,9 @@ void criaVetorIdx(){
     }*/
 
     if(flagIdx1 == 0){
+        printf("teste1");
         aux = fileOpen(FileAP1,&headListAP1);
         fp = fileOpen(FileAP1,&headListAP1);
-        int i = 0;
         offsetProx = 4;
         while(i!=-1){
             fread(tam,sizeof(int),1,fp);
@@ -338,6 +341,10 @@ void criaVetorIdx(){
                 fseek(aux,offsetProx*sizeof(char),0);
             }
         }
+        for(i=0;i<fimIdx1;i++){
+            printf("cod %d\n",Idx1[i].codControle);
+            printf("off %d\n",Idx1[i].offset);
+        }
         fclose(fp);
         fclose(aux);
         fclose(fpIdx1);
@@ -345,14 +352,16 @@ void criaVetorIdx(){
     }
 
     else{
-        aux = fileOpenIdx(FileIdx1, &flagIdx1);
-        while(!feof(fpIdx1) || !feof(aux)){
+        while(i != -1){
+            rewind(fpIdx1);
+            cont++;
+            fseek(fpIdx1,cont*sizeof(RegIdx)+4,1);
             fread(codControle,sizeof(int),1,fpIdx1);
             Idx1[fimIdx1].codControle = atoi(codControle);
             fread(offset,sizeof(int),1,fpIdx1);
             Idx1[fimIdx1].offset = atoi(offset);
-            fseek(aux,sizeof(RegIdx),SEEK_CUR);
-            fpIdx1 = aux;
+            fimIdx1++;
+            i = fgetc(fpIdx1);
         }
         fclose(fp);
         fclose(aux);
@@ -369,14 +378,35 @@ void salvaIdx()
     fp = fileOpenIdx(FileIdx1, &flagIdx1);
 
     int i;
-    char controle[4],offset[4];
+    char controle[5],offset[5],flag[5];
 
+    rewind(fp);
+    itoa(flagIdx1,flag,10);
+    fwrite(flag,sizeof(int),1,fp);
+    fclose(fp);
+    return 1;
+    //fread(controle,sizeof(int),1,fp);
     for(i = 0; i < fimIdx1; i++){
         itoa(Idx1[i].codControle,controle,10);
+        puts(controle);
         fwrite(controle,sizeof(int),1,fp);
         itoa(Idx1[i].offset,offset,10);
+        puts(offset);
         fwrite(offset,sizeof(int),1,fp);
     }
+    for(i = 0; i<fimIdx1;i++){
+        printf("cod %d",Idx1[i].codControle);
+        printf("offset %d",Idx1[i].offset);
+    }
+    rewind(fp);
+    fread(flag,sizeof(int),1,fp);
+    printf("teste1%d",atoi(flag));
+    fread(flag,sizeof(int),1,fp);
+    printf("teste2 %d",atoi(flag));
+    fread(flag,sizeof(int),1,fp);
+    printf("teste3 %d",atoi(flag));
+    fclose(fp);
+
     return 0;
 }
 
