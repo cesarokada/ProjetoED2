@@ -302,21 +302,6 @@ void criaVetorIdx(){
     int offsetProx,i = 0,cont = 0;
 
     fpIdx1 = fileOpenIdx(FileIdx1, &flagIdx1);
-    //fclose(fpIdx1);
-    //return 0;
-    //fpIdx1 = fopen(FileIdx1,"w+b");
-    //char valor[4];
-    //itoa(flagIdx1,valor,10);
-    //fread(valor,4*sizeof(int),1,fpIdx1);
-    //printf(" cabeca ooo %d",atoi(valor));
-    //fclose(fpIdx1);
-    //return 1;
-
-    /*if(!feof(fpIdx1)){
-        flagIdx1 = 1;
-        fclose(fpIdx1);
-        return 1;
-    }*/
 
     if(flagIdx1 == 0){
         printf("teste1");
@@ -341,10 +326,10 @@ void criaVetorIdx(){
                 fseek(aux,offsetProx*sizeof(char),0);
             }
         }
-        for(i=0;i<fimIdx1;i++){
+        /*for(i=0;i<fimIdx1;i++){
             printf("cod %d\n",Idx1[i].codControle);
             printf("off %d\n",Idx1[i].offset);
-        }
+        }*/
         fclose(fp);
         fclose(aux);
         fclose(fpIdx1);
@@ -357,8 +342,8 @@ void criaVetorIdx(){
             fseek(fpIdx1,(cont*sizeof(RegIdx))+4,0);
             fread(codControle,sizeof(int),1,fpIdx1);
             Idx1[fimIdx1].codControle = atoi(codControle);
-            puts(codControle);
-            printf("%d",atoi(codControle));
+            //puts(codControle);
+            //printf("%d",atoi(codControle));
             fread(offset,sizeof(int),1,fpIdx1);
             Idx1[fimIdx1].offset = atoi(offset);
             fimIdx1++;
@@ -388,31 +373,63 @@ void salvaIdx()
     //fread(controle,sizeof(int),1,fp);
     for(i = 0; i < fimIdx1; i++){
         itoa(Idx1[i].codControle,controle,10);
-        puts(controle);
+        //puts(controle);
         fwrite(controle,sizeof(int),1,fp);
         itoa(Idx1[i].offset,offset,10);
-        puts(offset);
+        //puts(offset);
         fwrite(offset,sizeof(int),1,fp);
     }
-    for(i = 0; i<fimIdx1;i++){
+    /*for(i = 0; i<fimIdx1;i++){
         printf("cod %d",Idx1[i].codControle);
         printf("offset %d",Idx1[i].offset);
-    }
+    }*/
     rewind(fp);
     fread(flag,sizeof(int),1,fp);
-    printf("teste1%d",atoi(flag));
+    //printf("teste1%d",atoi(flag));
     fread(flag,sizeof(int),1,fp);
-    printf("teste2 %d",atoi(flag));
+    //printf("teste2 %d",atoi(flag));
     fread(flag,sizeof(int),1,fp);
-    printf("teste3 %d",atoi(flag));
+    //printf("teste3 %d",atoi(flag));
     fclose(fp);
 
     return 0;
 }
 
+int pesquisaKeyPrimariaAP1(int ch)
+{
+    int i, achou = 0,offset;
+
+    for(i = 0; i < fimIdx1; i++){
+        if(ch == Idx1[i].codControle){
+            achou = 1;
+            offset = Idx1[i].offset;
+            break
+        }
+    }
+
+    if(achou)
+        return offset;
+    else
+        return -1;
+}
+
+void pegaCampo(FILE *fp, char *buffer)
+{
+    char c,buffer[50];
+    int i = 0;
+
+    c = fgetc(fp);
+    while(c == '|'){
+        c = fgetc(fp);
+        buffer[i] = c;
+        i++;
+    }
+}
+
 int alteraVacina()
 {
     int ch, op, achou;
+    char vacina[50],data[50],resp[50];
     FILE *fp;
     FILE *aux;
 
@@ -421,19 +438,24 @@ int alteraVacina()
     printf("\nDigite o Codigo do cachorro que deseja alterar: ");
     scanf("%d",&ch);
 
-    fp = fileOpen(FileAP2,&headListAP2);
+    fp = fileOpen(FileAP1,&headListAP1);
     aux = fileOpen(FileAP2,&headListAP2);
 
-    achou = pesquisaKeyPrimariaAP2(ch, fp);
+    achou = pesquisaKeyPrimariaAP2(ch, aux);
     if(achou == -1)
         return 0;
+
+    achou = pesquisaKeyPrimariaAP1()
 
     fseek(aux,achou*sizeof(RegAP2),1);
     fread(reg2.raca,50*sizeof(char),1,aux);
     fread(reg2.nomeCachorro,50*sizeof(char),1,aux);
+    fseek(fp,achou * sizeof(int),0);
+    vacina = pegaCampo(fp);
 
-    printf("Raca do Cachorro: %s",reg2.raca);
-    printf("Nome do Cachorro: %s",reg2.nomeCachorro);
+    printf("\nRaca do Cachorro: %s",reg2.raca);
+    printf("\nNome do Cachorro: %s",reg2.nomeCachorro);
+    printf("\nNome do Cachorro: %s",reg2.nomeCachorro);
 
 
     do{
