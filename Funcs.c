@@ -352,19 +352,19 @@ void criaVetorIdx(){
     }
 
     else{
+        printf("teste 1");
         while(i != -1){
-            rewind(fpIdx1);
-            cont++;
-            fseek(fpIdx1,cont*sizeof(RegIdx)+4,1);
+            fseek(fpIdx1,(cont*sizeof(RegIdx))+4,0);
             fread(codControle,sizeof(int),1,fpIdx1);
             Idx1[fimIdx1].codControle = atoi(codControle);
+            puts(codControle);
+            printf("%d",atoi(codControle));
             fread(offset,sizeof(int),1,fpIdx1);
             Idx1[fimIdx1].offset = atoi(offset);
             fimIdx1++;
+            cont++;
             i = fgetc(fpIdx1);
         }
-        fclose(fp);
-        fclose(aux);
         fclose(fpIdx1);
         return 1;
     }
@@ -383,8 +383,8 @@ void salvaIdx()
     rewind(fp);
     itoa(flagIdx1,flag,10);
     fwrite(flag,sizeof(int),1,fp);
-    fclose(fp);
-    return 1;
+    //fclose(fp);
+    //return 1;
     //fread(controle,sizeof(int),1,fp);
     for(i = 0; i < fimIdx1; i++){
         itoa(Idx1[i].codControle,controle,10);
