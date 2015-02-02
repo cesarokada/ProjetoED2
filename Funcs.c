@@ -407,7 +407,6 @@ void salvaIdx()
 int pesquisaKeyPrimariaAP1(int ch)
 {
     int i, achou = 0,offset;
-    FILE *fp;
     char buffer[50];
 
     for(i = 0; i < fimIdx1; i++){
@@ -440,6 +439,41 @@ void pegaCampo(FILE *fp, char *buffer)
     buffer[i] = '\0';
 }
 
+void removeAp1(int offset, int ch)
+{
+    FILE *fp;
+    char c = '!';
+    char dispo[5];
+    int achou;
+
+    fp = fileOpen(FileAP1,&headListAP1);
+    fseek(fp,(offset*sizeof(char))+4,0);
+    fwrite(c,sizeof(char),1,fp);
+    itoa(headListAP1,dispo,10);
+    fwrite(dispo,sizeof(int),1,fp);
+    headListAP1 = offset;
+    rewind(fp);
+    itoa(offset,dispo,10);
+    fwrite(dispo,sizeof(int),1,fp);
+    fclose(fp);
+
+    fp = fileOpenIdx(FileIdx1,&flagIdx1);
+    flagIdx1 = 0;
+    rewind(fp);
+    itoa(flagIdx1,dispo,10);
+    fwrite(dispo,sizeof(int),1,fp);
+
+    int i = 0;
+    for(i = 0; i < fimIdx1; i++){
+        if(ch == Idx1[i].codControle){
+            for(j = i; j < fimIdx1; j++){
+                Idx1[j] = Idx1[i + 1];
+            }
+            break;
+        }
+    }
+}
+
 void imprime(int offset)
 {
     char buffer[50],n[5];
@@ -458,12 +492,6 @@ void imprime(int offset)
     printf("\nResponsavel Pela Aplicacao: %s",buffer);
 
     fclose(fp);
-}
-
-int removeVacina(int offset, FILE* fp)
-{
-    fseek(fp,offset,0);
-    return 0;
 }
 
 /*int alteraVacina()
