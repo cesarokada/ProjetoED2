@@ -17,10 +17,11 @@ int menu()
     do{
         printf("1 - CADASTRO DE NOVA VACINA \n");
         printf("2 - ALTERAR O CAMPO DE ALGUM CADASTRO\n");
+        printf("5 - Consultar Cadastro(Pesquisa Idx Primario)\n");
         printf("0 - SAIR \n");
         printf("\n\nDIGITE A OPERACAO: ");
         scanf("%d",&op);
-    }while(op < 0 || op > 1);
+    }while(op < 0 || op > 5);
 
     return op;
 }
@@ -28,6 +29,7 @@ int menu()
 void validaOpcao(int opcao)
 {
     int codDog, retorno;
+    FILE *fp;
 
     switch(opcao){
         case 1:
@@ -42,11 +44,23 @@ void validaOpcao(int opcao)
         case 2:
             system("cls");
             cabecalho();
-            retorno = alteraVacina();
+            //retorno = alteraVacina();
             if (retorno)
                 printf("\nRegistro Alterado Com Sucesso");
             else
                 printf("Registro Não Encontrado");
+            break;
+
+        case 5:
+            system("cls");
+            cabecalho();
+            printf("\nDigite o Codigo do Cachorro a ser buscado: ");
+            scanf("%d",&codDog);
+            retorno = pesquisaKeyPrimariaAP1(codDog);
+            if (retorno != -1)
+                imprime(retorno);
+            else
+                printf("\nRegistro Nao Encontrado");
             break;
         case 0:
             salvaIdx();
@@ -60,11 +74,11 @@ int main()
 
     criaVetorIdx();
 
-    //wdo{
+    do{
         cabecalho();
         opcao = menu();
         validaOpcao(opcao);
         //system("cls");
-    //}while(opcao != 0);
+    }while(opcao != 0);
     return 0;
 }

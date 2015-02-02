@@ -307,6 +307,7 @@ void criaVetorIdx(){
         printf("teste1");
         aux = fileOpen(FileAP1,&headListAP1);
         fp = fileOpen(FileAP1,&headListAP1);
+
         offsetProx = 4;
         while(i!=-1){
             fread(tam,sizeof(int),1,fp);
@@ -318,18 +319,22 @@ void criaVetorIdx(){
             else{
                 fread(codControle,sizeof(int),1,fp);
                 Idx1[fimIdx1].codControle = atoi(codControle);
-                Idx1[fimIdx1].offset = offsetProx;
+                if(atoi(codControle) == 1){
+                    Idx1[fimIdx1].offset = ftell(aux);
+                }
+                Idx1[fimIdx1 + 1].offset = offsetProx;
                 fimIdx1++;
+
                 fseek(aux,offsetProx*sizeof(char),0);
                 *fp = *aux;
                 i = fgetc(aux);
                 fseek(aux,offsetProx*sizeof(char),0);
             }
         }
-        /*for(i=0;i<fimIdx1;i++){
+        for(i=0;i<fimIdx1;i++){
             printf("cod %d\n",Idx1[i].codControle);
             printf("off %d\n",Idx1[i].offset);
-        }*/
+        }
         fclose(fp);
         fclose(aux);
         fclose(fpIdx1);
@@ -349,6 +354,10 @@ void criaVetorIdx(){
             fimIdx1++;
             cont++;
             i = fgetc(fpIdx1);
+        }
+        for(i=0;i<fimIdx1;i++){
+            printf("cod %d\n",Idx1[i].codControle);
+            printf("off %d\n",Idx1[i].offset);
         }
         fclose(fpIdx1);
         return 1;
@@ -398,12 +407,14 @@ void salvaIdx()
 int pesquisaKeyPrimariaAP1(int ch)
 {
     int i, achou = 0,offset;
+    FILE *fp;
+    char buffer[50];
 
     for(i = 0; i < fimIdx1; i++){
         if(ch == Idx1[i].codControle){
             achou = 1;
             offset = Idx1[i].offset;
-            break
+            break;
         }
     }
 
@@ -415,18 +426,47 @@ int pesquisaKeyPrimariaAP1(int ch)
 
 void pegaCampo(FILE *fp, char *buffer)
 {
-    char c,buffer[50];
+    char c;
     int i = 0;
 
+    buffer[i] = '\0';
+
     c = fgetc(fp);
-    while(c == '|'){
-        c = fgetc(fp);
+    while(c != '|'){
         buffer[i] = c;
+        c = fgetc(fp);
         i++;
     }
+    buffer[i] = '\0';
 }
 
-int alteraVacina()
+void imprime(int offset)
+{
+    char buffer[50],n[5];
+    FILE *fp;
+
+    fp = fileOpen(FileAP1,&headListAP1);
+    fseek(fp,offset*sizeof(char),0);
+    fseek(fp,5 * sizeof(char),1);
+    pegaCampo(fp,buffer);
+    pegaCampo(fp,buffer);
+    pegaCampo(fp,buffer);
+    printf("\nNome da Vacina: %s",buffer);
+    pegaCampo(fp,buffer);
+    printf("\nData da Vacinacao: %s",buffer);
+    pegaCampo(fp,buffer);
+    printf("\nResponsavel Pela Aplicacao: %s",buffer);
+
+    fclose(fp);
+}
+
+int removeVacina(int offset, FILE* fp)
+{
+    fseek(fp,offset,0);
+    return 0;
+}
+
+/*int alteraVacina()
 {
     int ch, op, achou;
     char vacina[50],data[50],resp[50];
@@ -452,10 +492,15 @@ int alteraVacina()
     fread(reg2.nomeCachorro,50*sizeof(char),1,aux);
     fseek(fp,achou * sizeof(int),0);
     vacina = pegaCampo(fp);
+    data = pegaCampo(fp);
+    resp = pegaCampo(fp);
 
     printf("\nRaca do Cachorro: %s",reg2.raca);
     printf("\nNome do Cachorro: %s",reg2.nomeCachorro);
     printf("\nNome do Cachorro: %s",reg2.nomeCachorro);
+    printf("\n\nVacina: %s",vacina);
+    printf("\nData da Vacina: %s",data);
+    printf("\nResponsavel pela vacina: %s",resp);
 
 
     do{
@@ -470,6 +515,12 @@ int alteraVacina()
     }while(op < 0 || op > 6);
 
     switch(op){
+        case 1:
+            fseek(fp,achou * sizeof(int),0);
+            printf("Digite a Nova Vacina: ");
+            gets(vacina);
+
+
         case 5:
             fseek(fp,achou*sizeof(RegAP2),1);
             fseek(fp,sizeof(int),1);
@@ -499,4 +550,4 @@ int alteraVacina()
     printf("Dados do Cadastro Ja Alterado: \n");
 
     return 1;
-}
+}*/
