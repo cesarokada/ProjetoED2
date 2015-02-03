@@ -313,8 +313,10 @@ void criaVetorIdx(){
             fread(tam,sizeof(int),1,fp);
             offsetProx = offsetProx + atoi(tam) + 4;
             c = fgetc(fp);
+            printf("\ncaracter    %c",c);
             if (c == '!'){
                 fseek(aux,offsetProx*sizeof(char),0);
+                *fp = *aux;
             }
             else{
                 fread(codControle,sizeof(int),1,fp);
@@ -331,6 +333,7 @@ void criaVetorIdx(){
                 fseek(aux,offsetProx*sizeof(char),0);
             }
         }
+        printf("\n1");
         for(i=0;i<fimIdx1;i++){
             printf("cod %d\n",Idx1[i].codControle);
             printf("off %d\n",Idx1[i].offset);
@@ -342,6 +345,7 @@ void criaVetorIdx(){
     }
 
     else{
+        printf("\n2");
         printf("teste 1");
         while(i != -1){
             fseek(fpIdx1,(cont*sizeof(RegIdx))+4,0);
@@ -447,10 +451,15 @@ void removeAp1(int offset, int ch)
     int achou;
 
     fp = fileOpen(FileAP1,&headListAP1);
-    fseek(fp,(offset*sizeof(char))+4,0);
-    fwrite(c,sizeof(char),1,fp);
+    printf("teste1");
+    fseek(fp,offset*sizeof(char)+4,0);
+    printf("teste2");
+    fwrite(&c,sizeof(char),1,fp);
+    printf("teste3");
     itoa(headListAP1,dispo,10);
+    printf("teste4");
     fwrite(dispo,sizeof(int),1,fp);
+    printf("teste5");
     headListAP1 = offset;
     rewind(fp);
     itoa(offset,dispo,10);
@@ -462,15 +471,22 @@ void removeAp1(int offset, int ch)
     rewind(fp);
     itoa(flagIdx1,dispo,10);
     fwrite(dispo,sizeof(int),1,fp);
+    fclose(fp);
 
-    int i = 0;
+    int i = 0,j;
     for(i = 0; i < fimIdx1; i++){
         if(ch == Idx1[i].codControle){
             for(j = i; j < fimIdx1; j++){
                 Idx1[j] = Idx1[i + 1];
             }
+            fimIdx1--;
             break;
         }
+    }
+
+    for(i = 0; i<fimIdx1;i++){
+        printf("cod %d",Idx1[i].codControle);
+        printf("offset %d",Idx1[i].offset);
     }
 }
 

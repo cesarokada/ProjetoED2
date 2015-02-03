@@ -17,7 +17,8 @@ int menu()
     do{
         printf("1 - CADASTRO DE NOVA VACINA \n");
         printf("2 - ALTERAR O CAMPO DE ALGUM CADASTRO\n");
-        printf("5 - Consultar Cadastro(Pesquisa Idx Primario)\n");
+        printf("3 - REMOVER REGISTRO\n");
+        printf("5 - CONSULTAR CADASTRO(Pesquisa Idx Primario)\n");
         printf("0 - SAIR \n");
         printf("\n\nDIGITE A OPERACAO: ");
         scanf("%d",&op);
@@ -49,6 +50,20 @@ void validaOpcao(int opcao)
                 printf("\nRegistro Alterado Com Sucesso");
             else
                 printf("Registro Não Encontrado");
+            break;
+
+        case 3:
+            system("cls");
+            cabecalho();
+            printf("\nDigite o Codigo do Cachorro a Ser Removido: ");
+            scanf("%d",&codDog);
+            retorno = pesquisaKeyPrimariaAP1(codDog);
+            if (retorno != -1){
+                imprime(retorno);
+                removeAp1(retorno,codDog);
+            }
+            else
+                printf("\nRegistro Nao Encontrado");
             break;
 
         case 5:
