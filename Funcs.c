@@ -626,7 +626,7 @@ int alteraVacina()
                 insereAP1(&novo);
             }
             else{
-                fseek(fp,num * sizeof(int) + 5,0);
+                fseek(fp,num * sizeof(char) + 5,0);
                 fseek(fp,(strlen(codPet) + strlen(vacina))*sizeof(char),1);
                 fwrite(vacina,sizeof(char),strlen(data),fp);
                 fclose(fp);
@@ -651,7 +651,7 @@ int alteraVacina()
                 insereAP1(&novo);
             }
             else{
-                fseek(fp,num * sizeof(int) + 5,0);
+                fseek(fp,num * sizeof(char) + 5,0);
                 fseek(fp,(strlen(codPet) + strlen(vacina)+strlen(data))*sizeof(char),1);
                 fwrite(vacina,sizeof(char),strlen(resp),fp);
                 fclose(fp);
@@ -690,3 +690,48 @@ int alteraVacina()
 
     return 1;
 }
+
+void compactaArquivo()
+{
+    FILE *fp;
+    FILE *aux;
+    int c, offsetProx;
+    char tam[5],s;
+
+    fp = fopen(FileAP1,&headListAP1);
+    aux = fopen(FileAP1,&headListAP1);
+
+    if(!feof(fp))
+        return 1;
+
+    do{
+            fread(tam,sizeof(int),1,fp);
+            offsetProx = atoi(tam);
+            c = fgetc(fp);
+            if (c == '*'){
+                fseek(aux,offsetProx*sizeof(char),1);
+                *fp = *aux;
+            }
+            else{
+                fseek(aux,offsetProx*sizeof(char),1);
+                *fp = *aux;
+                fread(tam,sizeof(int),1,fp);
+                offsetProx = atoi(tam);
+                c = fgetc(fp);
+                pegaCampo(fp,)
+                fread(codControle,sizeof(int),1,fp);
+                Idx1[fimIdx1].codControle = atoi(codControle);
+                if(atoi(codControle) == 1){
+                    Idx1[fimIdx1].offset = ftell(aux);
+                }
+                Idx1[fimIdx1 + 1].offset = offsetProx;
+                fimIdx1++;
+
+                fseek(aux,offsetProx*sizeof(char),0);
+                *fp = *aux;
+                i = fgetc(aux);
+                fseek(aux,offsetProx*sizeof(char),0);
+            }
+    }while(c != EOF);
+}
+
