@@ -450,6 +450,9 @@ void removeAp1(int offset, int ch)
     char dispo[5];
     int achou;
 
+    if(fimIdx1 == 0)
+        return -1;
+
     fp = fileOpen(FileAP1,&headListAP1);
     printf("teste1");
     fseek(fp,offset*sizeof(char)+4,0);
@@ -510,10 +513,10 @@ void imprime(int offset)
     fclose(fp);
 }
 
-/*int alteraVacina()
+int alteraVacina()
 {
-    int ch, op, achou;
-    char vacina[50],data[50],resp[50];
+    int ch, op, achou, i,num, tam1,tam2,chAux;
+    char vacina[50],data[50],resp[50],s[10];
     FILE *fp;
     FILE *aux;
 
@@ -529,15 +532,27 @@ void imprime(int offset)
     if(achou == -1)
         return 0;
 
-    achou = pesquisaKeyPrimariaAP1()
+    for(i = 0; i < fimIdx1; i++){
+        fseek(fp,Idx1[i].offset*sizeof(char)+4,0);
+        pegaCampo(fp,s);
+        pegaCampo(fp,s);
+        num = Idx1[i].offset;
+        chAux = Idx1[i].codControle;
+        ch = atoi(s);
+        if(ch == num){
+            break;
+        }
+    }
 
-    fseek(aux,achou*sizeof(RegAP2),1);
+    fseek(aux,achou*sizeof(RegAP2) + 4,1);
     fread(reg2.raca,50*sizeof(char),1,aux);
     fread(reg2.nomeCachorro,50*sizeof(char),1,aux);
-    fseek(fp,achou * sizeof(int),0);
-    vacina = pegaCampo(fp);
-    data = pegaCampo(fp);
-    resp = pegaCampo(fp);
+    fseek(fp,num * sizeof(int) + 4,0);
+    pegaCampo(fp,vacina);//a funcao e chama 3 vezes
+    pegaCampo(fp,vacina);//por conta de pular o caracter *
+    pegaCampo(fp,vacina);//e depois pular o codigo do cachorro
+    pegaCampo(fp,data);
+    pegaCampo(fp,resp);
 
     printf("\nRaca do Cachorro: %s",reg2.raca);
     printf("\nNome do Cachorro: %s",reg2.nomeCachorro);
@@ -560,9 +575,17 @@ void imprime(int offset)
 
     switch(op){
         case 1:
-            fseek(fp,achou * sizeof(int),0);
+            tam1 = strlen(vacina);
+            //fseek(fp,num * sizeof(int),0);
             printf("Digite a Nova Vacina: ");
             gets(vacina);
+            tam2 = strlen(vacina);
+            if(tam2 > tam1){
+                removeAp1(num,chAux);
+                RegAP1 novo;
+                novo.codigoControle =
+                insereAP1()
+            }
 
 
         case 5:
@@ -594,4 +617,4 @@ void imprime(int offset)
     printf("Dados do Cadastro Ja Alterado: \n");
 
     return 1;
-}*/
+}
