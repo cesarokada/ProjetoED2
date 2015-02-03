@@ -479,18 +479,19 @@ void removeAp1(int offset, int ch)
     int i = 0,j;
     for(i = 0; i < fimIdx1; i++){
         if(ch == Idx1[i].codControle){
-            for(j = i; j < fimIdx1; j++){
+            for(j = i; j < fimIdx1 - 1; j++){
                 Idx1[j] = Idx1[i + 1];
+                i++;
             }
             fimIdx1--;
             break;
         }
     }
 
-    /*for(i = 0; i<fimIdx1;i++){
+    for(i = 0; i<fimIdx1;i++){
         printf("cod %d",Idx1[i].codControle);
         printf("offset %d",Idx1[i].offset);
-    }*/
+    }
 }
 
 void imprime(int offset)
@@ -533,21 +534,28 @@ int alteraVacina()
         return 0;
 
     for(i = 0; i < fimIdx1; i++){
+        printf("teste1");
         fseek(fp,Idx1[i].offset*sizeof(char)+4,0);
         pegaCampo(fp,s);
+        puts(s);
         pegaCampo(fp,s);
-        num = Idx1[i].offset;
+        puts(s);
         chAux = Idx1[i].codControle;
-        ch = atoi(s);
-        if(ch == num){
+        if(ch == chAux){
+            num = Idx1[i].offset;
             break;
         }
     }
+    printf("ch %d",ch);
 
-    fseek(aux,achou*sizeof(RegAP2) + 4,1);
+    fseek(aux,achou*sizeof(RegAP2) + 8,0);
+    printf("teste4");
     fread(reg2.raca,50*sizeof(char),1,aux);
+    puts(reg2.raca);
     fread(reg2.nomeCachorro,50*sizeof(char),1,aux);
-    fseek(fp,num * sizeof(int) + 5,0);
+    puts(reg2.nomeCachorro);
+    printf("num %d",num);
+    fseek(fp,num * sizeof(char) + 5,0);
     pegaCampo(fp,controle);//a funcao e chama 3 vezes
     pegaCampo(fp,codPet);//por conta de pular o caracter *
     pegaCampo(fp,vacina);//e depois pular o codigo do cachorro
@@ -576,7 +584,8 @@ int alteraVacina()
     switch(op){
         case 1:
             tam1 = strlen(vacina);
-            printf("Digite a Nova Vacina: ");
+            fflush(stdin);
+            printf("\nDigite a Nova Vacina: ");
             gets(vacina);
             tam2 = strlen(vacina);
             if(tam2 > tam1){
@@ -585,22 +594,22 @@ int alteraVacina()
 
                 novo.codigoControle = atoi(controle);
                 novo.codigoCachorro = ch;
-                novo.vacina = vacina;
-                novo.dataVacina = data;
-                novo.respVacina = resp;
+                strcpy(novo.vacina,vacina);
+                strcpy(novo.dataVacina,data);
+                strcpy(novo.respVacina,resp);
 
                 insereAP1(&novo);
             }
             else{
                 fseek(fp,num * sizeof(char) + 5,0);
-                fseek(fp,strlen(codPet),1);
+                fseek(fp,strlen(codPet)*sizeof(char),1);
                 fwrite(vacina,sizeof(char),strlen(vacina),fp);
                 fclose(fp);
             }
             break;
         case 2:
             tam1 = strlen(data);
-            printf("Digite a Nova Data da Vacina: ");
+            printf("\nDigite a Nova Data da Vacina: ");
             gets(data);
             tam2 = strlen(data);
             if(tam2 > tam1){
@@ -609,9 +618,10 @@ int alteraVacina()
 
                 novo.codigoControle = atoi(controle);
                 novo.codigoCachorro = ch;
-                novo.vacina = vacina;
-                novo.dataVacina = data;
-                novo.respVacina = resp;
+                strcpy(novo.vacina,vacina);
+                strcpy(novo.dataVacina,data);
+                strcpy(novo.respVacina,resp);
+
 
                 insereAP1(&novo);
             }
@@ -624,7 +634,7 @@ int alteraVacina()
             break;
         case 3:
             tam1 = strlen(resp);
-            printf("Digite a Nova Data da Vacina: ");
+            printf("\nDigite a Nova Data da Vacina: ");
             gets(resp);
             tam2 = strlen(resp);
             if(tam2 > tam1){
@@ -633,9 +643,10 @@ int alteraVacina()
 
                 novo.codigoControle = atoi(controle);
                 novo.codigoCachorro = ch;
-                novo.vacina = vacina;
-                novo.dataVacina = data;
-                novo.respVacina = resp;
+                strcpy(novo.vacina,vacina);
+                strcpy(novo.dataVacina,data);
+                strcpy(novo.respVacina,resp);
+
 
                 insereAP1(&novo);
             }
@@ -665,10 +676,13 @@ int alteraVacina()
     system("cls");
     cabecalho();
     rewind(aux);
-    fseek(aux,achou*sizeof(RegAP2),1);
-    fseek(aux,sizeof(int),1);
+
+    fseek(aux,achou*sizeof(RegAP2) + 8,0);
+    printf("teste4");
     fread(reg2.raca,50*sizeof(char),1,aux);
+    puts(reg2.raca);
     fread(reg2.nomeCachorro,50*sizeof(char),1,aux);
+    puts(reg2.nomeCachorro);
 
     printf("Raca do Cachorro: %s",reg2.raca);
     printf("Nome do Cachorro: %s",reg2.nomeCachorro);

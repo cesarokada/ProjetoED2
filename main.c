@@ -45,11 +45,11 @@ void validaOpcao(int opcao)
         case 2:
             system("cls");
             cabecalho();
-            //retorno = alteraVacina();
+            retorno = alteraVacina();
             if (retorno)
                 printf("\nRegistro Alterado Com Sucesso");
             else
-                printf("Registro Não Encontrado");
+                printf("Registro Nao Encontrado");
             break;
 
         case 3:
