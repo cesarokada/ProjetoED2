@@ -66,7 +66,12 @@ void validaOpcao(int opcao)
             else
                 printf("\nRegistro Nao Encontrado");
             break;
-
+        case 4:
+            system("cls");
+            cabecalho();
+            compactaArquivo();
+            printf("\nArquivo Compactado Com Sucesso!");
+            break;
         case 5:
             system("cls");
             cabecalho();

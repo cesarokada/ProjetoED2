@@ -166,19 +166,21 @@ void escreveFlag()
 int firstFit(int tam,FILE *fp){
 
     char tamRegDispo[5], valOffset[5];
-    int tamDispo, offsetProx, achou = 0,offsetDispo;
+    int tamDispo, offsetProx, achou = 0,offsetDispo,i;
     FILE *aux;
 
     aux = fileOpen(FileAP1, &headListAP1);
 
-    if(feof(aux));
+    i = fgetc(aux);
+    if (i == -1)
         return -1;
 
-    rewind(fp);
-    fseek(fp,sizeof(int),1);
+    if(headListAP1 == -1)
+        return -1;
 
-    fseek(fp,headListAP1*sizeof(char)+4 ,1);
-    fseek(aux,headListAP1*sizeof(char)+4,1);
+    fseek(fp,headListAP1*sizeof(char),0);
+    fseek(aux,headListAP1*sizeof(char),0);
+    printf("head %d",headListAP1);
 
     do{
         printf("teste7");
@@ -190,19 +192,29 @@ int firstFit(int tam,FILE *fp){
         if (tam <= tamDispo){
             printf("teste 8");
             achou = 1;
-            headListAP1 = offsetProx;
+            printf("teste 8");
+            /*headListAP1 = offsetProx;
+            printf("teste 8");
             itoa(headListAP1,valOffset,10);
+            printf("teste 8");*/
             rewind(fp);
+            printf("teste 8");
             fwrite(valOffset,sizeof(int),1,fp);
+            printf("teste 8");
             offsetDispo = ftell(aux);
+            printf("teste 8");
             break;
         }
 
+        fseek(fp,offsetProx*sizeof(char),0);
+        fseek(aux,offsetProx*sizeof(char),0);
     }while(offsetProx != -1);
 
 
-    if (achou)
+    if (achou){
+        printf("dispooo %d",offsetDispo);
         return offsetDispo;
+    }
     else
         return -1;
 }
@@ -217,12 +229,12 @@ int insereAP1(RegAP1* novoAp1){
 
     fpAP1 = fileOpen(FileAP1, &headListAP1);
     aux = fileOpen(FileAP1, &headListAP1);
-
+    printf("head1 %d",headListAP1);
     rewind(aux);
 
     fread(valorCabecalho,sizeof(int),1,aux);
     headListAP1 = atoi(valorCabecalho);
-
+    printf("head2 %d",headListAP1);
     if(fimIdx1 == 0){
         Idx1[fimIdx1].codControle = 1;
         novoAp1->codigoControle = Idx1[fimIdx1].codControle;
@@ -239,6 +251,7 @@ int insereAP1(RegAP1* novoAp1){
     tam = strlen(buffer);
 
     offsetAux = firstFit(tam,aux);
+    printf("head %d",headListAP1);
     if(headListAP1 == -1 || offsetAux == -1){
         fseek(aux,1,SEEK_END);
         Idx1[fimIdx1].offset = (ftell(aux)-4);
@@ -260,7 +273,7 @@ int insereAP1(RegAP1* novoAp1){
         fimIdx1++;
 
         rewind(aux);
-        fseek(aux,proxOffset*sizeof(char),1);
+        fseek(aux,offsetAux*sizeof(char),0);
         itoa(tam,num1,10);
         fwrite(num1,sizeof(int),1,aux);
         fwrite(buffer,sizeof(char),tam,aux);
@@ -290,6 +303,21 @@ int obterDadosCadastroAP1(int codDog)
 
     return insereAP1(&novoAp1);
 }
+void pegaCampo(FILE *fp, char *buffer)
+{
+    char c;
+    int i = 0;
+
+    buffer[i] = '\0';
+
+    c = fgetc(fp);
+    while(c != '|'){
+        buffer[i] = c;
+        c = fgetc(fp);
+        i++;
+    }
+    buffer[i] = '\0';
+}
 
 void criaVetorIdx(){
     FILE *fpIdx1;
@@ -306,6 +334,13 @@ void criaVetorIdx(){
         aux = fileOpen(FileAP1,&headListAP1);
         fp = fileOpen(FileAP1,&headListAP1);
 
+        if(feof(fp)){
+            flagIdx1 = 1;
+            escreveFlag();
+            return 0;
+        }
+
+        fseek(fp,sizeof(int),0);
         offsetProx = 4;
         while(i!=-1){
             fread(tam,sizeof(int),1,fp);
@@ -315,14 +350,18 @@ void criaVetorIdx(){
             if (c == '!'){
                 fseek(aux,offsetProx*sizeof(char),0);
                 *fp = *aux;
+                i = fgetc(aux);
+                fseek(aux,offsetProx*sizeof(char),0);
             }
             else{
-                fread(codControle,sizeof(int),1,fp);
+                pegaCampo(fp,codControle);
                 Idx1[fimIdx1].codControle = atoi(codControle);
-                if(atoi(codControle) == 1){
+                if(fimIdx1 == 0){
                     Idx1[fimIdx1].offset = ftell(aux);
                 }
-                Idx1[fimIdx1 + 1].offset = offsetProx;
+                else{
+                    Idx1[fimIdx1].offset = ftell(fp) - 7;
+                }
                 fimIdx1++;
 
                 fseek(aux,offsetProx*sizeof(char),0);
@@ -345,6 +384,8 @@ void criaVetorIdx(){
     else{
         printf("\n2");
         printf("teste 1");
+
+        i = fgetc(fpIdx1);
         while(i != -1){
             fseek(fpIdx1,(cont*sizeof(RegIdx))+4,0);
             fread(codControle,sizeof(int),1,fpIdx1);
@@ -425,22 +466,6 @@ int pesquisaKeyPrimariaAP1(int ch)
         return -1;
 }
 
-void pegaCampo(FILE *fp, char *buffer)
-{
-    char c;
-    int i = 0;
-
-    buffer[i] = '\0';
-
-    c = fgetc(fp);
-    while(c != '|'){
-        buffer[i] = c;
-        c = fgetc(fp);
-        i++;
-    }
-    buffer[i] = '\0';
-}
-
 void removeAp1(int offset, int ch)
 {
     FILE *fp;
@@ -453,7 +478,12 @@ void removeAp1(int offset, int ch)
 
     fp = fileOpen(FileAP1,&headListAP1);
     printf("teste1");
-    fseek(fp,offset*sizeof(char)+4,0);
+    fseek(fp,offset*sizeof(char) + 4,0);
+    //char *teste = "testando";
+    //fwrite(teste,sizeof(char),strlen(teste),fp);
+    //fread(dispo,sizeof(int),1,fp);
+    //printf("\n\n disponivel %d\n\n",atoi(dispo));
+    //puts(dispo);
     printf("teste2");
     fwrite(&c,sizeof(char),1,fp);
     printf("teste3");
@@ -698,12 +728,14 @@ void compactaArquivo()
 
     fp = fileOpen(FileAP1,&headListAP1);
 
-    if(!feof(fp)){
+    /*if(!(feof(fp))){
         fclose(fp);
         fclose(aux);
         return 1;
-    }
-    aux = fopen("aux.bin","w+b");
+    }*/
+
+    if((aux = fopen("arqAux.bin","w+b")) == NULL)
+        printf("erro");
 
     //rewind(fp);
     //fread(head,sizeof(int),1,fp);
@@ -725,7 +757,7 @@ void compactaArquivo()
     if(remove(FileAP1) != 0)
         printf("\nErro ao Apagar o Arquivo\n");
 
-    result = rename("aux.bin",FileAP1);
+    result = rename("arqAux.bin",FileAP1);
     if (result != 0)
         printf("\nErro ao Renomear o Arquivo\n");
 }
