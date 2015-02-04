@@ -161,8 +161,6 @@ void escreveFlag()
     rewind(fp);
     itoa(flagIdx1,flag,10);
     fwrite(flag,sizeof(int),1,fp);
-
-    return 0;
 }
 
 int firstFit(int tam,FILE *fp){
@@ -695,43 +693,40 @@ void compactaArquivo()
 {
     FILE *fp;
     FILE *aux;
-    int c, offsetProx;
-    char tam[5],s;
+    int i, offset, c, result;
+    char tam[5],headAux[5],buffer[100];
 
-    fp = fopen(FileAP1,&headListAP1);
-    aux = fopen(FileAP1,&headListAP1);
+    fp = fileOpen(FileAP1,&headListAP1);
 
-    if(!feof(fp))
+    if(!feof(fp)){
+        fclose(fp);
+        fclose(aux);
         return 1;
+    }
+    aux = fopen("aux.bin","w+b");
 
-    do{
-            fread(tam,sizeof(int),1,fp);
-            offsetProx = atoi(tam);
-            c = fgetc(fp);
-            if (c == '*'){
-                fseek(aux,offsetProx*sizeof(char),1);
-                *fp = *aux;
-            }
-            else{
-                fseek(aux,offsetProx*sizeof(char),1);
-                *fp = *aux;
-                fread(tam,sizeof(int),1,fp);
-                offsetProx = atoi(tam);
-                c = fgetc(fp);
-                pegaCampo(fp,)
-                fread(codControle,sizeof(int),1,fp);
-                Idx1[fimIdx1].codControle = atoi(codControle);
-                if(atoi(codControle) == 1){
-                    Idx1[fimIdx1].offset = ftell(aux);
-                }
-                Idx1[fimIdx1 + 1].offset = offsetProx;
-                fimIdx1++;
+    //rewind(fp);
+    //fread(head,sizeof(int),1,fp);
+    c = -1;
+    itoa(c,headAux,10);
+    fwrite(headAux,sizeof(int),1,aux);
 
-                fseek(aux,offsetProx*sizeof(char),0);
-                *fp = *aux;
-                i = fgetc(aux);
-                fseek(aux,offsetProx*sizeof(char),0);
-            }
-    }while(c != EOF);
+    for(i = 0; i < fimIdx1; i++){
+        fseek(fp,Idx1[i].offset*sizeof(char),0);
+        fread(tam,sizeof(int),1,fp);
+        fwrite(tam,sizeof(int),1,aux);
+        fread(buffer,sizeof(char),atoi(tam),fp);
+        fwrite(buffer,sizeof(char),atoi(tam),aux);
+    }
+
+    fclose(fp);
+    fclose(aux);
+
+    if(remove(FileAP1) != 0)
+        printf("\nErro ao Apagar o Arquivo\n");
+
+    result = rename("aux.bin",FileAP1);
+    if (result != 0)
+        printf("\nErro ao Renomear o Arquivo\n");
 }
 

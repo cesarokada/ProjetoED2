@@ -18,6 +18,7 @@ int menu()
         printf("1 - CADASTRO DE NOVA VACINA \n");
         printf("2 - ALTERAR O CAMPO DE ALGUM CADASTRO\n");
         printf("3 - REMOVER REGISTRO\n");
+        printf("4 - COMPACTAR O ARQUIVO\n");
         printf("5 - CONSULTAR CADASTRO(Pesquisa Idx Primario)\n");
         printf("0 - SAIR \n");
         printf("\n\nDIGITE A OPERACAO: ");
