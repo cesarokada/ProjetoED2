@@ -545,7 +545,8 @@ void imprime(int offset)
 int alteraVacina()
 {
     int ch, op, achou, i,num, tam1,tam2,chAux;
-    char vacina[50],data[50],resp[50],s[10],controle[10],codPet[10];
+    char vacina[50],data[50],resp[50],campoAux[50],s[10],controle[10],codPet[10];
+    char completa = '\0';
     FILE *fp;
     FILE *aux;
 
@@ -630,13 +631,16 @@ int alteraVacina()
             }
             else{
                 fseek(fp,num * sizeof(char) + 5,0);
-                fseek(fp,strlen(codPet)*sizeof(char),1);
+                pegaCampo(fp,campoAux);
+                fseek(fp,strlen(codPet)*sizeof(char)+1,1);
                 fwrite(vacina,sizeof(char),strlen(vacina),fp);
+                fwrite(&completa,sizeof(char),1,fp);
                 fclose(fp);
             }
             break;
         case 2:
             tam1 = strlen(data);
+            fflush(stdin);
             printf("\nDigite a Nova Data da Vacina: ");
             gets(data);
             tam2 = strlen(data);
@@ -662,6 +666,7 @@ int alteraVacina()
             break;
         case 3:
             tam1 = strlen(resp);
+            fflush(stdin);
             printf("\nDigite a Nova Data da Vacina: ");
             gets(resp);
             tam2 = strlen(resp);
@@ -688,6 +693,7 @@ int alteraVacina()
         case 4:
             fseek(fp,achou*sizeof(RegAP2),1);
             fseek(fp,sizeof(int),1);
+            fflush(stdin);
             printf("Digite a Nova Raca do Cachorro: ");
             gets(reg2.raca);
             fwrite(reg2.raca,50*sizeof(char),1,fp);
@@ -696,12 +702,13 @@ int alteraVacina()
             fseek(fp,achou*sizeof(RegAP2),1);
             fseek(fp,sizeof(int),1);
             fseek(fp,50*sizeof(char),1);
+            fflush(stdin);
             printf("Digite o Novo Nome do Cachorro: ");
             gets(reg2.nomeCachorro);
             fwrite(reg2.nomeCachorro,50*sizeof(char),1,fp);
             break;
     }
-    system("cls");
+    //system("cls");
     cabecalho();
     rewind(aux);
 
