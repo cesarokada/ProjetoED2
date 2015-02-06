@@ -801,14 +801,11 @@ void criaVetorIdxSec()
         pegaCampo(fp,vacina);
 
         if(i == 0){
-            fwrite(vacina,sizeof(char),strlen(vacina),fpIdx2);
-            itoa(i,offset,10);
-            fwrite(offset,sizeof(int),1,fpIdx2);
             fwrite(codControl,sizeof(int),1,fpIdxAux);
             itoa(ultimo,offsetProx,10);
             fwrite(offsetProx,sizeof(int),1,fpIdxAux);
-            strcpy(Idx2[i].vacina,vacina);
-            Idx2[i].offset = 0;
+            strcpy(Idx2[fimIdx2].vacina,vacina);
+            Idx2[fimIdx2].offset = 0;
             fimIdx2++;
         }
         else{
@@ -821,9 +818,10 @@ void criaVetorIdxSec()
             if(achou){
                 fseek(fpIdxAux,0,SEEK_END);
                 pos = ftell(fpIdxAux);
-
+                //fseek(fpIdxAux,Idx2[j].offset*sizeof(char),0);
+                itoa(Idx2[j].offset,offsetProx,10);
                 while(atoi(offsetProx) != -1){
-                    fseek(fpIdxAux,Idx2[j].offset*sizeof(char),0);
+                    fseek(fpIdxAux,atoi(offsetProx)*sizeof(char),0);
                     fseek(fpIdxAux,sizeof(int),1);
                     fread(offsetProx,sizeof(int),1,fpIdxAux);
                 }
@@ -834,6 +832,7 @@ void criaVetorIdxSec()
                 fwrite(codControl,sizeof(int),1,fpIdxAux);
                 itoa(ultimo,offsetProx,10);
                 fwrite(offsetProx,sizeof(int),1,fpIdxAux);
+                achou = 0;
             }
             else{
                 fseek(fpIdxAux,0,SEEK_END);
@@ -848,13 +847,14 @@ void criaVetorIdxSec()
         }
     }
 
-    for(i = 0; i < fimIdx2; i++){
+    for(i = 0; i <= fimIdx2; i++){
         fwrite(Idx2[i].vacina,sizeof(char),strlen(vacina),fpIdx2);
         puts(Idx2[i].vacina);
         itoa(Idx2[i].offset,offset,10);
         fwrite(offset,sizeof(int),1,fpIdx2);
         printf("  %d\n",Idx2[i].offset);
     }
+    printf("  %d\n",fimIdx2);
     fclose(fpIdx2);
     fclose(fpIdxAux);
     fclose(fp);
