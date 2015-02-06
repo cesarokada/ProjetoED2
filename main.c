@@ -94,6 +94,7 @@ int main()
     int opcao;
 
     criaVetorIdx();
+    criaVetorIdxSec();
 
     do{
         cabecalho();

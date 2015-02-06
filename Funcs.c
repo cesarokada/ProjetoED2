@@ -12,6 +12,8 @@ O arquivo Funcs.c vai conter todas as funcoes do projeto
 #define FileAP1 "Ap1.bin"
 #define FileAP2 "Ap2.bin"
 #define FileIdx1 "Idx1.bin"
+#define FileIdx2 "Idx2Vacina.bin"
+#define FileIdx2Cod "Idx2CodControle.bin"
 
 #include "arqFuncs.h"
 
@@ -31,12 +33,6 @@ typedef struct registroAP1{
     char respVacina[50];
 } RegAP1; //RegAP1 vai receber as estruturas do Arquivo Principal 1
 
-typedef struct idxAP1{
-    int idx_codControle;
-    int offset;
-    int flag;
-} IDX_RegAP1; //IDX_RegAP1 sera a estrutura de indices do AP1
-
 
 typedef struct registroAP2{
     int codigoCachorro;
@@ -48,6 +44,11 @@ typedef struct registroIndices{
     int codControle;
     int offset;
 }RegIdx;
+
+typedef struct registroIndicesSec{
+    char vacina[50];
+    int offset;
+}RegIdx2;
 /*******************************************************************/
 int headListAP1 = -1;//indica a cabeça da lista de disponíveis em AP1
 int headListAP2 = -1;//indica a cabeça da lista de disponíveis em AP2
@@ -55,6 +56,9 @@ int headListAP2 = -1;//indica a cabeça da lista de disponíveis em AP2
 
 RegIdx Idx1[MAX]; //Vetor que guarda as estruturas do indice
 int fimIdx1 = 0;
+
+RegIdx2 Idx2[MAX];
+int fimIdx2 = 0;
 
 int pesquisaKeyPrimariaAP2(int ch, FILE *fp)
 {
@@ -769,3 +773,89 @@ void compactaArquivo()
         printf("\nErro ao Renomear o Arquivo\n");
 }
 
+void criaVetorIdxSec()
+{
+    char tam[5],codControl[5],codDog[5],vacina[50],offset[5],offsetProx[5];
+    int ultimo = -1,i,j,pos,achou = 0;
+
+    FILE *fp;
+    FILE *fpIdx2;
+    FILE *fpIdxAux;
+
+    fp = fileOpen(FileAP1,&headListAP1);
+    fpIdx2 = fopen(FileIdx2,"w+b");
+    fpIdxAux = fopen(FileIdx2Cod,"w+b");
+
+    if(fpIdx2 == NULL)
+        printf("Erro ao Abrir o Arquivo!\n");
+
+    if(fpIdxAux == NULL)
+        printf("Erro ao Abrir o Arquivo!\n");
+
+    for(i = 0; i < fimIdx1; i++){
+        fseek(fp,Idx1[i].offset*sizeof(char),0);
+        fread(tam,sizeof(int),1,fp);
+        fseek(fp,sizeof(char),1);
+        pegaCampo(fp,codControl);
+        pegaCampo(fp,codDog);
+        pegaCampo(fp,vacina);
+
+        if(i == 0){
+            fwrite(vacina,sizeof(char),strlen(vacina),fpIdx2);
+            itoa(i,offset,10);
+            fwrite(offset,sizeof(int),1,fpIdx2);
+            fwrite(codControl,sizeof(int),1,fpIdxAux);
+            itoa(ultimo,offsetProx,10);
+            fwrite(offsetProx,sizeof(int),1,fpIdxAux);
+            strcpy(Idx2[i].vacina,vacina);
+            Idx2[i].offset = 0;
+            fimIdx2++;
+        }
+        else{
+            for(j = 0; j < fimIdx2; j++){
+                if((strcmp(Idx2[j].vacina,vacina)) == 0){
+                    achou = 1;
+                    break;
+                }
+            }
+            if(achou){
+                fseek(fpIdxAux,0,SEEK_END);
+                pos = ftell(fpIdxAux);
+
+                while(atoi(offsetProx) != -1){
+                    fseek(fpIdxAux,Idx2[j].offset*sizeof(char),0);
+                    fseek(fpIdxAux,sizeof(int),1);
+                    fread(offsetProx,sizeof(int),1,fpIdxAux);
+                }
+                fseek(fpIdxAux,-(sizeof(int)),1);
+                itoa(pos,offsetProx,10);
+                fwrite(offsetProx,sizeof(int),1,fpIdxAux);
+                fseek(fpIdxAux,0,SEEK_END);
+                fwrite(codControl,sizeof(int),1,fpIdxAux);
+                itoa(ultimo,offsetProx,10);
+                fwrite(offsetProx,sizeof(int),1,fpIdxAux);
+            }
+            else{
+                fseek(fpIdxAux,0,SEEK_END);
+                pos = ftell(fpIdxAux);
+                fwrite(codControl,sizeof(int),1,fpIdxAux);
+                itoa(ultimo,offsetProx,10);
+                fwrite(offsetProx,sizeof(int),1,fpIdxAux);
+                strcpy(Idx2[fimIdx2].vacina,vacina);
+                Idx2[fimIdx2].offset = pos;
+                fimIdx2++;
+            }
+        }
+    }
+
+    for(i = 0; i < fimIdx2; i++){
+        fwrite(Idx2[i].vacina,sizeof(char),strlen(vacina),fpIdx2);
+        puts(Idx2[i].vacina);
+        itoa(Idx2[i].offset,offset,10);
+        fwrite(offset,sizeof(int),1,fpIdx2);
+        printf("  %d\n",Idx2[i].offset);
+    }
+    fclose(fpIdx2);
+    fclose(fpIdxAux);
+    fclose(fp);
+}

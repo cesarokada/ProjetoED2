@@ -75,7 +75,7 @@ FILE* fileOpenIdx(char *fileName, int *head)
         itoa(*head,valorFlag,10);
         fwrite(valorFlag,sizeof(int),1,fp);
         //fclose(fp);
-        printf("teste");
+        //printf("teste");
         //fp = fopen(fileName,"r+b");
         //fread(valorFlag,sizeof(int),1,fp);
         //printf("arquivo %d",atoi(valorFlag));
