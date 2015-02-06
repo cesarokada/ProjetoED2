@@ -223,6 +223,67 @@ int firstFit(int tam,FILE *fp){
         return -1;
 }
 
+void insereIdx2(char *vacina, int codContole){
+    FILE *fpIdx2;
+    FILE *fpIdxAux;
+
+    fpIdx2 = fopen(FileIdx2,"r+b");
+    fpIdxAux = fopen(FileIdx2Cod,"r+b");
+
+    if(fpIdx2 == NULL)
+        printf("Erro ao Abrir o Arquivo!\n");
+
+    if(fpIdxAux == NULL)
+        printf("Erro ao Abrir o Arquivo!\n");
+
+    char tam[5],codControl[5],codDog[5],offset[5],offsetProx[5];
+    int ultimo = -1,i,j,pos,achou = 0;
+
+    for(i = 0; i < fimIdx2; i++){
+        if((strcmp(Idx2[i].vacina,vacina)) == 0){
+            achou = 1;
+            break;
+        }
+    }
+    if(achou){
+        fseek(fpIdxAux,0,SEEK_END);
+        pos = ftell(fpIdxAux);
+        //fseek(fpIdxAux,Idx2[j].offset*sizeof(char),0);
+        itoa(Idx2[i].offset,offsetProx,10);
+        while(atoi(offsetProx) != -1){
+            fseek(fpIdxAux,atoi(offsetProx)*sizeof(char),0);
+            fseek(fpIdxAux,sizeof(int),1);
+            fread(offsetProx,sizeof(int),1,fpIdxAux);
+        }
+        fseek(fpIdxAux,-(sizeof(int)),1);
+        itoa(pos,offsetProx,10);
+        fwrite(offsetProx,sizeof(int),1,fpIdxAux);
+        fseek(fpIdxAux,0,SEEK_END);
+        itoa(codContole,codControl,10);
+        fwrite(codControl,sizeof(int),1,fpIdxAux);
+        itoa(ultimo,offsetProx,10);
+        fwrite(offsetProx,sizeof(int),1,fpIdxAux);
+        achou = 0;
+    }
+     else{
+        fseek(fpIdxAux,0,SEEK_END);
+        pos = ftell(fpIdxAux);
+        itoa(codContole,codControl,10);
+        fwrite(codControl,sizeof(int),1,fpIdxAux);
+        itoa(ultimo,offsetProx,10);
+        fwrite(offsetProx,sizeof(int),1,fpIdxAux);
+        strcpy(Idx2[fimIdx2].vacina,vacina);
+        Idx2[fimIdx2].offset = pos;
+        itoa(pos,offsetProx,10);
+        fwrite(Idx2[fimIdx2].vacina,sizeof(char),strlen(Idx2[fimIdx2].vacina),fpIdx2);
+        fwrite(offsetProx,sizeof(char),1,fpIdx2);
+        fimIdx2++;
+    }
+
+    fclose(fpIdx2);
+    fclose(fpIdxAux);
+}
+
 int insereAP1(RegAP1* novoAp1){
 
     int tam, proxOffset,auxCod, offsetAux;
@@ -255,7 +316,7 @@ int insereAP1(RegAP1* novoAp1){
     tam = strlen(buffer);
 
     offsetAux = firstFit(tam,aux);
-    printf("head %d",headListAP1);
+
     if(headListAP1 == -1 || offsetAux == -1){
         fseek(aux,1,SEEK_END);
         Idx1[fimIdx1].offset = (ftell(aux)-4);
@@ -265,6 +326,7 @@ int insereAP1(RegAP1* novoAp1){
         itoa(tam,num1,10);
         fwrite(num1,sizeof(int),1,fpAP1);
         fwrite(buffer,sizeof(char),tam,fpAP1);
+        insereIdx2(novoAp1->vacina,novoAp1->codigoControle);
         flagIdx1 = 0;
         escreveFlag();
         fclose(fpAP1);
@@ -281,6 +343,7 @@ int insereAP1(RegAP1* novoAp1){
         itoa(tam,num1,10);
         fwrite(num1,sizeof(int),1,aux);
         fwrite(buffer,sizeof(char),tam,aux);
+        insereIdx2(novoAp1->vacina,novoAp1->codigoControle);
         flagIdx1 = 0;
         escreveFlag();
         fclose(fpAP1);
@@ -470,10 +533,111 @@ int pesquisaKeyPrimariaAP1(int ch)
         return -1;
 }
 
+void removeIdx2(char *vacina,int codControle)
+{
+    FILE *fpIdx2;
+    FILE *fpIdxAux;
+    FILE *aux;
+
+    fpIdx2 = fopen(FileIdx2,"r+b");
+    fpIdxAux = fopen(FileIdx2Cod,"r+b");
+    aux = fopen(FileIdx2Cod,"r+b");
+
+    if(fpIdx2 == NULL)
+        printf("Erro ao Abrir o Arquivo!\n");
+
+    if(fpIdxAux == NULL)
+        printf("Erro ao Abrir o Arquivo!\n");
+
+    if(aux == NULL)
+        printf("Erro ao Abrir o Arquivo!\n");
+
+    int i,j,anterior,achou = 0;
+
+    for(i = 0; i < fimIdx2; i++){
+        printf("teste11");
+        if(strcmp(Idx2[i].vacina,vacina) == 0){
+            achou = 1;
+            break;
+        }
+    }
+
+    fseek(fpIdxAux,Idx2[i].offset*sizeof(char),0);
+    fseek(aux,Idx2[i].offset*sizeof(char),0);
+
+    char codigo[5],offsetProx[5];
+
+    fread(codigo,sizeof(int),1,fpIdxAux);
+    fread(offsetProx,sizeof(int),1,fpIdxAux);
+    fseek(aux,sizeof(int),1);
+
+    if(codControle == atoi(codigo)){
+        Idx2[i].offset = atoi(offsetProx);
+        fclose(fpIdx2);
+        fpIdx2 = fopen(FileIdx2,"w+b");
+
+        char n[5];
+
+        for(i = 0; i < fimIdx2; i++){
+            fwrite(Idx2[i].vacina,sizeof(char),strlen(Idx2[i].vacina),fpIdx2);
+            itoa(Idx2[i].offset,n,10);
+            fwrite(n,sizeof(int),1,fpIdx2);
+        }
+        fclose(fpIdx2);
+        fclose(aux);
+        fclose(fpIdxAux);
+        return 0;
+    }
+
+    if(atoi(offsetProx) == -1){
+        for(j = i; j < fimIdx2; j++){
+            i++;
+            Idx2[j] = Idx2[i];
+            printf("teste3");
+        }
+        fimIdx2--;
+        fclose(fpIdx2);
+
+        fpIdx2 = fopen(FileIdx2,"w+b");
+        char n[5];
+
+        for(i = 0; i < fimIdx2; i++){
+            fwrite(Idx2[i].vacina,sizeof(char),strlen(Idx2[i].vacina),fpIdx2);
+            itoa(Idx2[i].offset,n,10);
+            fwrite(n,sizeof(int),1,fpIdx2);
+        }
+        fclose(fpIdx2);
+        fclose(aux);
+        fclose(fpIdxAux);
+        return 0;
+    }
+    printf("\ncodigo %d\n",codControle);
+
+    i = 0;
+    for( ; ; ){
+        fseek(fpIdxAux,atoi(offsetProx)*sizeof(char),0);
+        anterior = atoi(offsetProx);
+        fread(codigo,sizeof(int),1,fpIdxAux);
+        fread(offsetProx,sizeof(int),1,fpIdxAux);
+
+        if(codControle == atoi(codigo))
+            break;
+        fseek(aux,anterior*sizeof(char) + 4,0);
+        i++;
+    }
+
+    fwrite(offsetProx,sizeof(int),1,aux);
+    fclose(aux);
+    fclose(fpIdx2);
+    fclose(fpIdxAux);
+}
+
 void removeAp1(int offset, int ch)
 {
     FILE *fp;
-    char c = '!';
+    FILE *aux;
+
+    char c = '!',codControle[5],codDog[5],vacina[50];
     char dispo[5];
     int achou;
 
@@ -481,15 +645,20 @@ void removeAp1(int offset, int ch)
         return -1;
 
     fp = fileOpen(FileAP1,&headListAP1);
+    aux = fileOpen(FileAP1,&headListAP1);
     printf("teste1");
     fseek(fp,offset*sizeof(char) + 4,0);
+    fseek(aux,offset*sizeof(char) + 5,0);
     //char *teste = "testando";
     //fwrite(teste,sizeof(char),strlen(teste),fp);
     //fread(dispo,sizeof(int),1,fp);
     //printf("\n\n disponivel %d\n\n",atoi(dispo));
     //puts(dispo);
     printf("teste2");
+    pegaCampo(aux,codControle);
     fwrite(&c,sizeof(char),1,fp);
+    pegaCampo(aux,codDog);
+    pegaCampo(aux,vacina);
     printf("teste3");
     itoa(headListAP1,dispo,10);
     printf("teste4");
@@ -500,6 +669,7 @@ void removeAp1(int offset, int ch)
     itoa(offset,dispo,10);
     fwrite(dispo,sizeof(int),1,fp);
     fclose(fp);
+    fclose(aux);
 
     fp = fileOpenIdx(FileIdx1,&flagIdx1);
     flagIdx1 = 0;
@@ -519,6 +689,8 @@ void removeAp1(int offset, int ch)
             break;
         }
     }
+
+    removeIdx2(vacina,atoi(codControle));
 
     for(i = 0; i<fimIdx1;i++){
         printf("cod %d",Idx1[i].codControle);
@@ -799,7 +971,6 @@ void criaVetorIdxSec()
         pegaCampo(fp,codControl);
         pegaCampo(fp,codDog);
         pegaCampo(fp,vacina);
-
         if(i == 0){
             fwrite(codControl,sizeof(int),1,fpIdxAux);
             itoa(ultimo,offsetProx,10);
@@ -812,6 +983,7 @@ void criaVetorIdxSec()
             for(j = 0; j < fimIdx2; j++){
                 if((strcmp(Idx2[j].vacina,vacina)) == 0){
                     achou = 1;
+                    printf("teste 11\n");
                     break;
                 }
             }
@@ -847,7 +1019,7 @@ void criaVetorIdxSec()
         }
     }
 
-    for(i = 0; i <= fimIdx2; i++){
+    for(i = 0; i < fimIdx2; i++){
         fwrite(Idx2[i].vacina,sizeof(char),strlen(vacina),fpIdx2);
         puts(Idx2[i].vacina);
         itoa(Idx2[i].offset,offset,10);
