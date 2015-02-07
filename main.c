@@ -20,10 +20,11 @@ int menu()
         printf("3 - REMOVER REGISTRO\n");
         printf("4 - COMPACTAR O ARQUIVO\n");
         printf("5 - CONSULTAR CADASTRO(Pesquisa Idx Primario)\n");
+        printf("6 - CONSULTAR CADASTRO PELA VACINA(Pesquisa Idx secundario)\n");
         printf("0 - SAIR \n");
         printf("\n\nDIGITE A OPERACAO: ");
         scanf("%d",&op);
-    }while(op < 0 || op > 5);
+    }while(op < 0 || op > 6);
 
     return op;
 }
@@ -31,6 +32,7 @@ int menu()
 void validaOpcao(int opcao)
 {
     int codDog, retorno;
+    char vacina[40];
     FILE *fp;
 
     switch(opcao){
@@ -83,6 +85,16 @@ void validaOpcao(int opcao)
             else
                 printf("\nRegistro Nao Encontrado");
             break;
+
+        case 6:
+            system("cls");
+            cabecalho();
+            fflush(stdin);
+            printf("\nDigite a Vacina a Ser Buscada: ");
+            gets(vacina);
+            pesquisaKeySec(vacina);
+            break;
+
         case 0:
             salvaIdx();
             break;

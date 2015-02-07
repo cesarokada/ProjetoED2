@@ -700,15 +700,35 @@ void removeAp1(int offset, int ch)
 
 void imprime(int offset)
 {
-    char buffer[50],n[5];
+    char buffer[50],n[5],codCahorro[5];
+    int achou;
+
+    RegAP2 reg2;
+
     FILE *fp;
+    FILE *fp2;
 
     fp = fileOpen(FileAP1,&headListAP1);
+    fp2 = fileOpen(FileAP2,&headListAP2);
+
     fseek(fp,offset*sizeof(char),0);
     fseek(fp,5 * sizeof(char),1);
     pegaCampo(fp,buffer);
     pegaCampo(fp,buffer);
+    strcpy(codCahorro,buffer);
     pegaCampo(fp,buffer);
+
+    achou = pesquisaKeyPrimariaAP2(atoi(codCahorro),fp2);
+    fseek(fp2,achou*sizeof(RegAP2) + 8,0);
+    fread(reg2.raca,50*sizeof(char),1,fp2);
+    puts(reg2.raca);
+    fread(reg2.nomeCachorro,50*sizeof(char),1,fp2);
+    puts(reg2.nomeCachorro);
+
+
+    printf("\nRaca do Cachorro: %s",reg2.raca);
+    printf("\nNome do Cachorro: %s\n",reg2.nomeCachorro);
+
     printf("\nNome da Vacina: %s",buffer);
     pegaCampo(fp,buffer);
     printf("\nData da Vacinacao: %s",buffer);
@@ -716,6 +736,7 @@ void imprime(int offset)
     printf("\nResponsavel Pela Aplicacao: %s",buffer);
 
     fclose(fp);
+    fclose(fp2);
 }
 
 int alteraVacina()
@@ -759,7 +780,6 @@ int alteraVacina()
     puts(reg2.raca);
     fread(reg2.nomeCachorro,50*sizeof(char),1,aux);
     puts(reg2.nomeCachorro);
-    printf("num %d",num);
     fseek(fp,num * sizeof(char) + 5,0);
     pegaCampo(fp,controle);//a funcao e chama 3 vezes
     pegaCampo(fp,codPet);//por conta de pular o caracter *
@@ -768,7 +788,6 @@ int alteraVacina()
     pegaCampo(fp,resp);
 
     printf("\nRaca do Cachorro: %s",reg2.raca);
-    printf("\nNome do Cachorro: %s",reg2.nomeCachorro);
     printf("\nNome do Cachorro: %s",reg2.nomeCachorro);
     printf("\n\nVacina: %s",vacina);
     printf("\nData da Vacina: %s",data);
@@ -1030,4 +1049,49 @@ void criaVetorIdxSec()
     fclose(fpIdx2);
     fclose(fpIdxAux);
     fclose(fp);
+}
+
+void pesquisaKeySec(char *vacina)
+{
+    FILE *fp;
+    FILE *fpIdxAux;
+
+    fp = fileOpen(FileAP1,&headListAP1);
+    fpIdxAux = fopen(FileIdx2Cod,"r+b");
+
+    if(fpIdxAux == NULL)
+        printf("Erro ao Abrir o Arquivo!\n");
+
+    int i, achou = 0, retorno;
+    char n[5],offsetProx[5],codControle[5];
+
+    for(i = 0; i < fimIdx2; i++){
+        if(strcmp(vacina,Idx2[i].vacina) == 0){
+            achou = 1;
+            break;
+        }
+    }
+
+    if (achou){
+        fseek(fpIdxAux,Idx2[i].offset*sizeof(char),0);
+        system("cls");
+        cabecalho();
+        printf("\nRegistros encontrados : \n");
+        while(atoi(offsetProx) != -1){
+            fread(codControle,sizeof(int),1,fpIdxAux);
+            retorno = pesquisaKeyPrimariaAP1(atoi(codControle));
+            imprime(retorno);
+            printf("\n----------------------------------------------\n");
+            fread(offsetProx,sizeof(int),1,fpIdxAux);
+            fseek(fpIdxAux,atoi(offsetProx)*sizeof(char),0);
+        }
+        fclose(fpIdxAux);
+        fclose(fp);
+    }
+
+    else
+        printf("\nRegistro Nao Encontrado!\n");
+
+    getch();
+    system("cls");
 }
