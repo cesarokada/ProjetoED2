@@ -3,7 +3,7 @@
 
 #include "Funcs.h"
 
-void cabecalho()
+void cabecalho()//Metodo com cabeçalho para ser impresso no porgrama
 {
     printf("------------------------------------------------------------------------------\n");
     printf("|                           VETERINARIA                                       |\n");
@@ -11,9 +11,9 @@ void cabecalho()
     printf("------------------------------------------------------------------------------\n");
 }
 
-int menu()
+int menu()//Metodo para imprimir as opções do programa
 {
-    int op;
+    int op;//variável para armazenar opção
     do{
         printf("1 - CADASTRO DE NOVA VACINA \n");
         printf("2 - ALTERAR O CAMPO DE ALGUM CADASTRO\n");
@@ -23,8 +23,8 @@ int menu()
         printf("6 - CONSULTAR CADASTRO PELA VACINA(Pesquisa Idx secundario)\n");
         printf("0 - SAIR \n");
         printf("\n\nDIGITE A OPERACAO: ");
-        scanf("%d",&op);
-    }while(op < 0 || op > 6);
+        scanf("%d",&op);//Lê opção do usuário
+    }while(op < 0 || op > 6);//Laço de verificação da opção digitada pelo usuário
 
     return op;
 }
@@ -101,9 +101,8 @@ void validaOpcao(int opcao)
     }
 }
 
-int main()
-{
-    int opcao;
+int main() {//Metodo Main
+    int opcao;//Variável para armazenar a opção do usuário
 
     criaVetorIdx();
     criaVetorIdxSec();
@@ -112,7 +111,8 @@ int main()
         cabecalho();
         opcao = menu();
         validaOpcao(opcao);
-        //system("cls");
+
     }while(opcao != 0);
+
     return 0;
 }

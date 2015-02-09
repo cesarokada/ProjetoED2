@@ -9,7 +9,6 @@ O arquivo Funcs.c vai conter todas as funcoes do projeto
 
 #define MAX 1000
 
-#define FileAP1 "Ap1.bin"
 #define FileAP2 "Ap2.bin"
 #define FileIdx1 "Idx1.bin"
 #define FileIdx2 "Idx2Vacina.bin"
@@ -155,9 +154,9 @@ int obterDadosCadastroAP2()
         return 0;
 }
 
-void escreveFlag()
+void escreveFlag()//
 {
-    FILE *fp;
+    FILE *fp;//Ponteiro para armezanar arquivo
     fp = fileOpenIdx(FileIdx1, &flagIdx1);
 
     char flag[5];
@@ -386,24 +385,23 @@ void pegaCampo(FILE *fp, char *buffer)
     buffer[i] = '\0';
 }
 
-void criaVetorIdx(){
-    FILE *fpIdx1;
+void criaVetorIdx() {
+    FILE *fpIdx1;//Ponteiro para arquivo indice do arquivo de dados 1, vacinas
     FILE *fp;
     FILE* aux;
 
     char tam[5],c,codControle[5],offset[5];
     int offsetProx,i = 0,cont = 0;
 
-    fpIdx1 = fileOpenIdx(FileIdx1, &flagIdx1);
+    fpIdx1 = fileOpenIdx(FileIdx1, &flagIdx1);//Abre o arquivo indice 1 e obtem o flag se ele possui erros ou não
 
-    if(flagIdx1 == 0){
-        printf("teste1");
-        aux = fileOpen(FileAP1,&headListAP1);
-        fp = fileOpen(FileAP1,&headListAP1);
+    if(flagIdx1 == 0) {//Caso o arquivo de indice possua erros construir novo indice baseado no arquivo de dados
+        aux = fileOpen(FileAP1,&headListAP1);//Abre o arquivo de dados de vacinas
+        fp = fileOpen(FileAP1,&headListAP1);//Abre o mesmo arquivo novamente, mas com outro ponteiro
 
-        if(feof(fp)){
-            flagIdx1 = 1;
-            escreveFlag();
+        if(feof(fp)){//Se o arquivo de vacinas estiver vazio...
+            flagIdx1 = 1;//Seta o flag para sem erro
+            escreveFlag();//
             return 0;
         }
 
@@ -446,14 +444,11 @@ void criaVetorIdx(){
         fclose(aux);
         fclose(fpIdx1);
         return 1;
-    }
 
-    else{
-        printf("\n2");
-        printf("teste 1");
-
+    } else {
         i = fgetc(fpIdx1);
-        while(i != -1){
+
+        while(i != -1) {
             fseek(fpIdx1,(cont*sizeof(RegIdx))+4,0);
             fread(codControle,sizeof(int),1,fpIdx1);
             Idx1[fimIdx1].codControle = atoi(codControle);
